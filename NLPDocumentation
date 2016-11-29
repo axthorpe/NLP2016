@@ -1,0 +1,8 @@
+Using Rhyming Dictionary 0.9 developed by Brian Langenberger, which is built on top of CMU's pronounciation dictionary. See: http://rhyme.sourceforge.net/
+	How to interact with this tool:
+		1.) Install it on a unix system by downloading it from https://sourceforge.net/projects/rhyme/files/rhyme/0.9/rhyme-0.9.tar.gz/download?use_mirror=heanet and following included instructions
+		2.) Get a list of rhyming words by typing the command: rhyme <word>
+		2.) Get syllable count of a word by typing: rhyme -s <word>
+		3.) For help, type: rhyme
+
+Calculating the Rhyme Score:

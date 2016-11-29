@@ -4,7 +4,7 @@ import shlex
 from subprocess import Popen, PIPE
 from spacy.en import English
 
-nlp = English()
+#nlp = English()
 
 class Node:
 	def __init__(self, val):
@@ -30,11 +30,26 @@ def synonymMaker(word):
 	# print(set(antonyms))
 
 def rhymeMaker(word):
+        digits = ['2','3','4','5','6','7','8','9']
 	cmd = 'rhyme ' + word
 	process = Popen(shlex.split(cmd), stdout=PIPE)
 	output = process.communicate()
 	exit_code = process.wait()
-	print(str(output[0]))
+        split_syllable = output[0].split('\n\n')
+        split_syllable[0] = split_syllable[0][36:] # Remove initial phrase
+        rhymes_syllable = []
+        curr_list = []
+        for i in range(len(split_syllable)):
+                split_syllable[i] = split_syllable[i][3:]
+                print(split_syllable[i])
+        for i in range(len(split_syllable)):
+                if not split_syllable[i] == '':
+                        if split_syllable[i][0] in digits:
+                                rhymes_syllable.append(curr_list)
+                                curr_list = []
+                        curr_list.append(split_syllable[i])
+        rhymes_syllable.append(curr_list)
+        return str(rhymes_syllable)
 
 def dependencyParser(sentence):
 	nodes = []
@@ -75,7 +90,8 @@ def printTree(n):
 	if n.right != None:
 		printTree(n.right)
 if __name__ == '__main__':
-	driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
+        (rhymeMaker('Hello'))
+        #driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
 	#nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])
 

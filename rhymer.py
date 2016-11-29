@@ -4,7 +4,7 @@ import shlex
 from subprocess import Popen, PIPE
 from spacy.en import English
 
-#nlp = English()
+nlp = English()
 
 class Node:
 	def __init__(self, val):
@@ -26,30 +26,41 @@ def synonymMaker(word):
 	        synonyms.append(l.name())
 	        # if l.antonyms():
 	        #     antonyms.append(l.antonyms()[0].name())
-	return set(synonyms)
+	return list(synonyms)
 	# print(set(antonyms))
 
 def rhymeMaker(word):
-        digits = ['2','3','4','5','6','7','8','9']
+	digits = ['2','3','4','5','6','7','8','9']
 	cmd = 'rhyme ' + word
+	if '\'' in word:
+		return None
+	if word in digits:
+		return None
+	if word == '0':
+		return None
+	if word == '1':
+		return None
 	process = Popen(shlex.split(cmd), stdout=PIPE)
 	output = process.communicate()
 	exit_code = process.wait()
-        split_syllable = output[0].split('\n\n')
-        split_syllable[0] = split_syllable[0][36:] # Remove initial phrase
-        rhymes_syllable = []
-        curr_list = []
-        for i in range(len(split_syllable)):
-                split_syllable[i] = split_syllable[i][3:]
-                print(split_syllable[i])
-        for i in range(len(split_syllable)):
-                if not split_syllable[i] == '':
-                        if split_syllable[i][0] in digits:
-                                rhymes_syllable.append(curr_list)
-                                curr_list = []
-                        curr_list.append(split_syllable[i])
-        rhymes_syllable.append(curr_list)
-        return str(rhymes_syllable)
+	if output[0][0] == '*':
+		return None
+	# split_syllable = output[0].split('\n\n')
+	# split_syllable[0] = split_syllable[0][36:] # Remove initial phrase
+	# rhymes_syllable = []
+	# curr_list = []
+	# ret = []
+	# for i in range(len(split_syllable)):
+	# 	split_syllable[i] = split_syllable[i][3:]
+	# 	split_syllable[i] = split_syllable[i].replace('\n', ',')
+	# 	temp = split_syllable[i].split(',')
+	# 	for j in range(len(temp)):
+	# 		temp[j] = temp[j].strip()
+	# 		temp[j] = temp[j].translate(None, '()1234567890')
+	# 		ret.append(temp[j])
+	# 	split_syllable[i] = temp
+	# return split_syllable, ret
+	return output[0]
 
 def dependencyParser(sentence):
 	nodes = []
@@ -70,19 +81,56 @@ def driver(sentence1):
 		docInfo.append(splitted)
 	firstSentence =  docInfo[0]
 	secondSentence = docInfo[1]
-	for word1 in firstSentence:
+	# synonyms1 = []
+	# synonyms2 = []
+	# for i in range(len(firstSentence)):
+	# 	synonyms1.append(synonymMaker[firstSentence[i]])
+	# for i in range(len(secondSentence)):
+	#  	synonyms2.append(synonymMaker[secondSentence[i]])
+
+	for k,word1 in enumerate(firstSentence):
 		synonyms1 = synonymMaker(word1)
 		if synonyms1 != None:	
-			for word2 in secondSentence:
+			for l,word2 in enumerate(secondSentence):
 				synonyms2 = synonymMaker(word2)
 				if synonyms2 != None:
-					for syn1 in synonyms1:
+					for i in range(len(synonyms1)):
+						syn1 = synonyms1[i]
+						if '_' in syn1:
+							syn1 = syn1[len(syn1) - syn1[::-1].index('_'):]
 						rhymes1 = rhymeMaker(syn1)
 						if rhymes1 != None:
-							for syn2 in synonyms2:
-								if syn2 in rhymes1:
-									print(syn1 + "   " + syn2)
-
+							if rhymes1.strip() != '':
+								for j in range(len(synonyms2)):
+									syn2 = synonyms2[j]
+									if '_' in syn2:
+										syn2 = syn2[len(syn2) - syn2[::-1].index('_'):]
+									rhymes2 = rhymeMaker(syn2)
+									if rhymes2 != None:
+										if rhymes2.strip() != '':
+											if str(rhymes1[((str(rhymes1)).index('\n')):]) == str(rhymes2[((str(rhymes2)).index('\n')):]):
+												sample_sent1 = firstSentence
+												sample_sent2 = secondSentence
+												sample_sent1[k] = syn1
+												sample_sent2[l] = syn2
+												changed_sent1 = ''
+												changed_sent2 = ''
+												for wd in sample_sent1:
+													changed_sent1 = changed_sent1 + wd + ' '
+												changed_sent1 = changed_sent1[:-1]
+												for wd in sample_sent2:
+													changed_sent2 = changed_sent2 + wd + ' '
+												changed_sent2 = changed_sent2[:-1]
+												print("------------------------------")
+												print(syn1)
+												print(syn2)
+												print(firstSentence)
+												print(secondSentence)
+												print(changed_sent1)
+												print(changed_sent2)
+												#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
+												print("------------------------------")
+												#print(syn1 + "   " + syn2)
 def printTree(n):
 	if n.left != None:
 		printTree(n.left)
@@ -90,8 +138,8 @@ def printTree(n):
 	if n.right != None:
 		printTree(n.right)
 if __name__ == '__main__':
-        (rhymeMaker('Hello'))
-        #driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
+	# print(rhymeMaker('Hello'))
+	driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
 	#nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])
 

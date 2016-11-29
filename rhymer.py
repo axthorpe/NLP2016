@@ -26,7 +26,7 @@ def synonymMaker(word):
 	        synonyms.append(l.name())
 	        # if l.antonyms():
 	        #     antonyms.append(l.antonyms()[0].name())
-	print(set(synonyms))
+	return set(synonyms)
 	# print(set(antonyms))
 
 def rhymeMaker(word):
@@ -47,8 +47,26 @@ def dependencyParser(sentence):
 			print(str('child: ' + child.text))
 
 def driver(sentence1):
+	candidates = []
 	doc = nlp(unicode(sentence1, 'utf-8'))
-	return doc.sents
+	docInfo = []
+	for sent in doc.sents:
+		splitted = (str(sent)).split()
+		docInfo.append(splitted)
+	firstSentence =  docInfo[0]
+	secondSentence = docInfo[1]
+	for word1 in firstSentence:
+		synonyms1 = synonymMaker(word1)
+		if synonyms1 != None:	
+			for word2 in secondSentence:
+				synonyms2 = synonymMaker(word2)
+				if synonyms2 != None:
+					for syn1 in synonyms1:
+						rhymes1 = rhymeMaker(syn1)
+						if rhymes1 != None:
+							for syn2 in synonyms2:
+								if syn2 in rhymes1:
+									print(syn1 + "   " + syn2)
 
 def printTree(n):
 	if n.left != None:
@@ -57,8 +75,8 @@ def printTree(n):
 	if n.right != None:
 		printTree(n.right)
 if __name__ == '__main__':
-	print(driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine."))
-	nodes = dependencyParser("The fox quickly jumps over the brown log")
+	driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
+	#nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])
 
 

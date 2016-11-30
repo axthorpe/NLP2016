@@ -208,9 +208,10 @@ if __name__ == '__main__':
 	#nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])
 
+	# print("hello world!")
+	# createRhymeDictionary()
 
-	print("hello world!")
-	createRhymeDictionary()
+
 # def dependencyParser(sentence)
 	# for sent in doc.sents:
 	# 	for token in sent:

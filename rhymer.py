@@ -4,6 +4,8 @@ from nltk.wsd import lesk
 import shlex
 from subprocess import Popen, PIPE
 from spacy.en import English
+from nltk.corpus import cmudict
+import pickle
 
 nlp = English()
 
@@ -43,6 +45,35 @@ def synonymMaker(word, sent, posTag):
 	        #     antonyms.append(l.antonyms()[0].name())
 	return list(synonyms)
 	# print(set(antonyms))
+
+def createRhymeDictionary():
+	d = cmudict.dict()
+	rhymesToIdx = {}
+	rhyme_groups = []
+	word_to_rhyme_group = {}
+	curr_idx = 0
+	for key in d:
+		print(key)
+		try:
+			rhyme_raw = rhymeMaker(key)
+			if rhyme_raw != None:
+				rhyme = str(rhyme_raw[((str(rhyme_raw)).index('\n')):])
+				if rhyme not in rhymesToIdx:
+					rhymesToIdx[rhyme] = curr_idx
+					rhyme_groups.append(rhyme)
+					curr_idx += 1
+				word_to_rhyme_group[key] = rhymesToIdx[rhyme]
+		except:
+			print(key)
+
+	rhyme_groups_file = open('rhyme_groups.pickle', 'w')
+	pickle.dump(rhyme_groups, rhyme_groups_file)
+	rhyme_groups_file.close()
+
+	w2r_file = open('word_to_rhyme_group.pickle', 'w')
+	pickle.dump(word_to_rhyme_group, w2r_file)
+	w2r_file.close()
+
 
 def rhymeMaker(word):
 	digits = ['2','3','4','5','6','7','8','9']
@@ -173,12 +204,13 @@ if __name__ == '__main__':
 	# print(posTag('The ram quickly jumps over the brown log'))
 	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
-	driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
+	#driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
 	#nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])
 
 
-
+	print("hello world!")
+	createRhymeDictionary()
 # def dependencyParser(sentence)
 	# for sent in doc.sents:
 	# 	for token in sent:

@@ -104,6 +104,20 @@ def driver(sentence1):
 	#  	synonyms2.append(synonymMaker[secondSentence[i]])
 	sent1_pos = ['', 'n', 'r', 'v', 'r', '', 'a', 'n']
 	sent2_pos = ['r', 'n', 'r', 'v', '', '', 'n', 'v', '', 'n']
+	for j in range(len(firstSentence)):
+		temp = firstSentence[j]
+		temp = temp.replace(',', '')
+		temp = temp.replace('.', '')
+		temp = temp.replace('!', '')
+		temp = temp.replace('?', '')
+		firstSentence[j] = temp
+	for j in range(len(secondSentence)):
+		temp = secondSentence[j]
+		temp = temp.replace(',', '')
+		temp = temp.replace('.', '')
+		temp = temp.replace('!', '')
+		temp = temp.replace('?', '')
+		secondSentence[j] = temp
 	for k,word1 in enumerate(firstSentence):
 		synonyms1 = synonymMaker(word1, firstSentence, sent1_pos[k])
 		if synonyms1 != None:	

@@ -1,29 +1,44 @@
 import nltk
 from nltk.corpus import wordnet
+from nltk.wsd import lesk
 import shlex
 from subprocess import Popen, PIPE
 from spacy.en import English
 
 nlp = English()
 
-class Node:
-	def __init__(self, val):
-		self.val = val
-		self.left = None
-		self.right = None
-		self.parent = None
-		self.tag = None
+# class Node:
+# 	def __init__(self, val):
+# 		self.val = val
+# 		self.left = None
+# 		self.right = None
+# 		self.parent = None
+# 		self.tag = None
 
-	def __str__(self):
-		return '(val='+str(self.val)+',left='+ (str(self.left.val) if self.left != None else 'None') + ',right='+(str(self.right.val) if self.right != None else 'None')+',parent='+(str(self.parent.val) if self.parent != None else 'None') +',tag='+str(self.tag)+')'
+# 	def __str__(self):
+# 		return '(val='+str(self.val)+',left='+ (str(self.left.val) if self.left != None else 'None') + ',right='+(str(self.right.val) if self.right != None else 'None')+',parent='+(str(self.parent.val) if self.parent != None else 'None') +',tag='+str(self.tag)+')'
 
-def synonymMaker(word):
+def posTag(sentence):
+	text = nltk.word_tokenize(sentence)
+	pos_tags = nltk.pos_tag(text)
+	for tag in pos_tags:
+		if tag[1] == 'DT':
+			continue
+	print(pos_tags)
+
+def synonymMaker(word, sent, posTag):
 	synonyms = []
 	# antonyms = []
-
+	# synsetWord = (lesk(sent.split(), word,pos='n'))
+	# print(synsetWord)
+	# for word1 in synsetWord.lemmas():
+	# 	synonyms.append(word1.name())
+	# for syn in wordnet.synsets(word):
+	# 	print(syn, syn.definition())
 	for syn in wordnet.synsets(word):
-	    for l in syn.lemmas():
-	        synonyms.append(l.name())
+		if syn.pos() == posTag or posTag == '':
+		    for l in syn.lemmas():
+		        synonyms.append(l.name())
 	        # if l.antonyms():
 	        #     antonyms.append(l.antonyms()[0].name())
 	return list(synonyms)
@@ -87,12 +102,15 @@ def driver(sentence1):
 	# 	synonyms1.append(synonymMaker[firstSentence[i]])
 	# for i in range(len(secondSentence)):
 	#  	synonyms2.append(synonymMaker[secondSentence[i]])
-
+	sent1_pos = ['', 'n', 'r', 'v', 'r', '', 'a', 'n']
+	sent2_pos = ['r', 'n', 'r', 'v', '', '', 'n', 'v', '', 'n']
 	for k,word1 in enumerate(firstSentence):
-		synonyms1 = synonymMaker(word1)
+		synonyms1 = synonymMaker(word1, firstSentence, sent1_pos[k])
 		if synonyms1 != None:	
 			for l,word2 in enumerate(secondSentence):
-				synonyms2 = synonymMaker(word2)
+				#if word1 == word2:
+				print(word1 + "*******" + word2)
+				synonyms2 = synonymMaker(word2, secondSentence, sent2_pos[l])
 				if synonyms2 != None:
 					for i in range(len(synonyms1)):
 						syn1 = synonyms1[i]
@@ -138,6 +156,8 @@ def printTree(n):
 	if n.right != None:
 		printTree(n.right)
 if __name__ == '__main__':
+	# print(posTag('The ram quickly jumps over the brown log'))
+	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
 	driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
 	#nodes = dependencyParser("The fox quickly jumps over the brown log")

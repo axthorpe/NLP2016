@@ -6,19 +6,29 @@ from subprocess import Popen, PIPE
 from spacy.en import English
 from nltk.corpus import cmudict
 import pickle
+import spacy
+import copy
+from nltk import Tree
 
 nlp = English()
+file1 = open('word_to_rhyme_group.pickle', 'rb')
+w2r_data = pickle.load(file1)
+file1.close()
+file2 = open('rhyme_groups.pickle', 'rb')
+rg_data = pickle.load(file2)
+file2.close()
+print_script = ''
 
-# class Node:
-# 	def __init__(self, val):
-# 		self.val = val
-# 		self.left = None
-# 		self.right = None
-# 		self.parent = None
-# 		self.tag = None
 
-# 	def __str__(self):
-# 		return '(val='+str(self.val)+',left='+ (str(self.left.val) if self.left != None else 'None') + ',right='+(str(self.right.val) if self.right != None else 'None')+',parent='+(str(self.parent.val) if self.parent != None else 'None') +',tag='+str(self.tag)+')'
+class Node:
+	def __init__(self, val):
+		self.val = val
+		self.children = []
+		self.parent = None
+		self.tag = None
+
+	def __str__(self):
+		return '(val='+str(self.val)+',children='+ (str([child.val for child in self.children])) +',parent='+(str(self.parent.val) if self.parent != None else 'None') +',tag='+str(self.tag)+')'
 
 def posTag(sentence):
 	text = nltk.word_tokenize(sentence)
@@ -28,23 +38,22 @@ def posTag(sentence):
 			continue
 	print(pos_tags)
 
-def synonymMaker(word, sent, posTag):
+def synonymMaker(word, sent):
 	synonyms = []
-	# antonyms = []
-	# synsetWord = (lesk(sent.split(), word,pos='n'))
-	# print(synsetWord)
-	# for word1 in synsetWord.lemmas():
-	# 	synonyms.append(word1.name())
-	# for syn in wordnet.synsets(word):
-	# 	print(syn, syn.definition())
-	for syn in wordnet.synsets(word):
-		if syn.pos() == posTag or posTag == '':
-		    for l in syn.lemmas():
-		        synonyms.append(l.name())
-	        # if l.antonyms():
-	        #     antonyms.append(l.antonyms()[0].name())
+	synset_word = lesk(sent, word)
+	if not synset_word:
+		return None
+	for syn in synset_word.lemmas():
+		synonyms.append(syn.name())
 	return list(synonyms)
-	# print(set(antonyms))
+
+# def synonymMaker(word, sent, posTag):
+# 	synonyms = []
+# 	for syn in wordnet.synsets(word):
+# 		if syn.pos() == posTag or posTag == '':
+# 		    for l in syn.lemmas():
+# 		        synonyms.append(l.name())
+# 	return list(synonyms)
 
 def createRhymeDictionary():
 	d = cmudict.dict()
@@ -55,7 +64,7 @@ def createRhymeDictionary():
 	for key in d:
 		print(key)
 		try:
-			rhyme_raw = rhymeMaker(key)
+			rhyme_raw = rhymeMaker2(key)
 			if rhyme_raw != None:
 				rhyme = str(rhyme_raw[((str(rhyme_raw)).index('\n')):])
 				if rhyme not in rhymesToIdx:
@@ -75,7 +84,7 @@ def createRhymeDictionary():
 	w2r_file.close()
 
 
-def rhymeMaker(word):
+def rhymeMaker2(word):
 	digits = ['2','3','4','5','6','7','8','9']
 	cmd = 'rhyme ' + word
 	if '\'' in word:
@@ -108,25 +117,143 @@ def rhymeMaker(word):
 	# return split_syllable, ret
 	return output[0]
 
-def dependencyParser(sentence):
+def rhymeMaker(word):
+	if word in w2r_data:
+		key = w2r_data[word]
+		rg = rg_data[key]
+		return rg
+	return None
+
+def printTree(n, text_of_interest):
+	global print_script
+	print(n.tag)
+	if len(n.children) == 0:
+		print_script = print_script +  (n.val) + ' '
+	elif n.val == text_of_interest:
+		for child in n.children:
+			printTree(child, text_of_interest)
+		print_script = print_script +  (n.val) + ' '
+	elif n.tag == 'NOUN':
+		temp_bool = True
+		for child in n.children:
+			if child.tag == 'ADJ':
+				printTree(child, text_of_interest)
+				print_script = print_script +  (n.val) + ' '
+				temp_bool = False
+			else:
+				printTree(child, text_of_interest)
+		if temp_bool:
+			print_script = print_script +  (n.val) + ' '
+	elif n.tag == 'VERB':
+		temp_bool = True
+		for i in range(0,len(n.children)):
+			if (n.children[i].tag == 'NOUN' or n.children[i].tag == 'ADV') and temp_bool:
+				printTree(n.children[i], text_of_interest)
+				print_script = print_script +  (n.val) + ' '
+				temp_bool = False
+			else:
+				printTree(n.children[i], text_of_interest)
+	else:
+		print_script = print_script +  (n.val) + ' '
+		for child in n.children:
+			printTree(child, text_of_interest)
+
+def to_nltk_tree(node):
+    if node.n_lefts + node.n_rights > 0:
+        return Tree(node.orth_, [to_nltk_tree(child) for child in node.children])
+    else:
+        return node.orth_
+
+def dependencyParser(sentence, prop_word):
+	global print_script
 	nodes = []
-	doc = nlp(unicode(sentence, 'utf-8'))
+	doc = nlp(sentence)
+	[to_nltk_tree(sent.root).pretty_print() for sent in doc.sents]
 	for sent in doc.sents:
 		r = sent.root
+		# emptyNode = spacy.tokens.token.Token(None,None,0)
+		# print(emptyNode.text)
+		# r.head = emptyNode
+		n = Node(r.text)
+		n.tag = r.pos_
 		print('root: ' + r.text)
-		print('parent: ' + r.head.text)
-		for child in r.children:
-			print(str('child: ' + child.text))
-
-def driver(sentence1):
-	candidates = []
-	doc = nlp(unicode(sentence1, 'utf-8'))
-	docInfo = []
+		running = True
+		list_of_nodes = []
+		list_of_mynodes = []
+		list_of_nodes.append(r)
+		list_of_mynodes.append(n)
+		while(running and len(list_of_nodes) != 0):
+			parent = list_of_nodes.pop(0)
+			my_parent = list_of_mynodes.pop(0)
+			for child in parent.children:
+				nd = Node(child.text)
+				nd.tag = child.pos_
+				nd.parent = my_parent
+				my_parent.children.append(nd)
+				list_of_nodes.append(child)
+				list_of_mynodes.append(nd)
+		# parent = n
+		# childs = []
+		# for child in r.children:
+		# 	newNode = Node(child.text)
+		# 	newNode.tag = child.tag
+		# 	newNode.parent = child.head.text
+		# 	childs.append(newNode)
+		# n.children = childs
+		text_of_interest = prop_word
+		node_of_interest = None
+		running = True
+		list_of_nodes = []
+		list_of_nodes.append(n)
+		while(running and len(list_of_nodes) != 0):
+			if list_of_nodes[0].val == text_of_interest:
+				node_of_interest = list_of_nodes[0]
+				running = False
+			for child in (list_of_nodes.pop(0)).children:
+				if child.val == text_of_interest:
+					node_of_interest = child
+					running = False
+				list_of_nodes.append(child)
+		running = True
+		while(running and node_of_interest.parent != None):
+			parent = node_of_interest.parent
+			childs = []
+			childs_text = []
+			for c in parent.children:
+				childs.append(c)
+				childs_text.append(c.val)
+			if childs_text[-1] != node_of_interest.val:
+				index_of_interest = childs_text.index(node_of_interest.val)
+				popped = childs.pop(index_of_interest)
+				childs.append(popped)
+				popped2 = childs_text.pop(index_of_interest)
+				childs_text.append(popped2)
+			parent.children = childs
+			node_of_interest = parent
+		print_script = ''
+		printTree(n, text_of_interest)
+		return print_script
 	for sent in doc.sents:
-		splitted = (str(sent)).split()
-		docInfo.append(splitted)
-	firstSentence =  docInfo[0]
-	secondSentence = docInfo[1]
+		for token in sent:
+			if token.is_alpha:
+				print token.head.lemma_, token.tag_, token.orth_
+
+def driverDriver(dict1, dict2):
+	ret1, ret2 = driver(dict1['sent'], dict2['sent'])
+	new_dict1 = {}
+	new_dict2 = {}
+	new_dict1['sent'] = ret1
+	new_dict1['ctx'] = dict1['ctx']
+	new_dict1['stress'] = dict1['stress']
+	new_dict2['sent'] = ret2
+	new_dict2['ctx'] = dict2['ctx']
+	new_dict2['stress'] = dict2['stress']
+	return new_dict1, new_dict2
+
+def driver(sentence1, sentence2):
+	candidates = []
+	firstSentence =  sentence1
+	secondSentence = sentence2
 	# synonyms1 = []
 	# synonyms2 = []
 	# for i in range(len(firstSentence)):
@@ -150,12 +277,12 @@ def driver(sentence1):
 		temp = temp.replace('?', '')
 		secondSentence[j] = temp
 	for k,word1 in enumerate(firstSentence):
-		synonyms1 = synonymMaker(word1, firstSentence, sent1_pos[k])
+		synonyms1 = synonymMaker(word1, firstSentence)
 		if synonyms1 != None:	
 			for l,word2 in enumerate(secondSentence):
 				#if word1 == word2:
 				print(word1 + "*******" + word2)
-				synonyms2 = synonymMaker(word2, secondSentence, sent2_pos[l])
+				synonyms2 = synonymMaker(word2, secondSentence)
 				if synonyms2 != None:
 					for i in range(len(synonyms1)):
 						syn1 = synonyms1[i]
@@ -172,8 +299,8 @@ def driver(sentence1):
 									if rhymes2 != None:
 										if rhymes2.strip() != '':
 											if str(rhymes1[((str(rhymes1)).index('\n')):]) == str(rhymes2[((str(rhymes2)).index('\n')):]):
-												sample_sent1 = firstSentence
-												sample_sent2 = secondSentence
+												sample_sent1 = firstSentence[:]
+												sample_sent2 = secondSentence[:]
 												sample_sent1[k] = syn1
 												sample_sent2[l] = syn2
 												changed_sent1 = ''
@@ -184,7 +311,10 @@ def driver(sentence1):
 												for wd in sample_sent2:
 													changed_sent2 = changed_sent2 + wd + ' '
 												changed_sent2 = changed_sent2[:-1]
+												propped_sent1 = dependencyParser(changed_sent1, syn1)
+												propped_sent2 = dependencyParser(changed_sent2, syn2)
 												print("------------------------------")
+												candidates.append([propped_sent1, propped_sent2])
 												print(syn1)
 												print(syn2)
 												print(firstSentence)
@@ -194,23 +324,24 @@ def driver(sentence1):
 												#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
 												print("------------------------------")
 												#print(syn1 + "   " + syn2)
-def printTree(n):
-	if n.left != None:
-		printTree(n.left)
-	print(n.val)
-	if n.right != None:
-		printTree(n.right)
-if __name__ == '__main__':
+	if len(candidates) == 0:
+		return sentence1, sentence2
+	else:
+		return candidates[0][0].split(' '), candidates[0][1].split(' ')
+#if __name__ == '__main__':
+	# dependencyParser('The man shot an elephant in his sleep')
 	# print(posTag('The ram quickly jumps over the brown log'))
 	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
-	#driver("The fox quickly jumps over the brown log. However, he then realizes that the log was a river. And the river was a ravine.")
-	#nodes = dependencyParser("The fox quickly jumps over the brown log")
+	# print(driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'}))
+	# driver(['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], ['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'])
+	# nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])
-
 	# print("hello world!")
 	# createRhymeDictionary()
 
+#sent, ctx, stress
+#sent_modded, ctx, stress
 
 # def dependencyParser(sentence)
 	# for sent in doc.sents:

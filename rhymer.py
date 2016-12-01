@@ -43,8 +43,20 @@ def synonymMaker(word, sent):
 	synset_word = lesk(sent, word)
 	if not synset_word:
 		return None
+
 	for syn in synset_word.lemmas():
 		synonyms.append(syn.name())
+	hypos = synset_word.hyponyms()
+
+	for hyps in hypos:
+		for ny in hyps.lemma_names()
+			synonyms.append(ny)
+	hypers = synset_word.hypernyms()
+
+	for hyps in hypers:
+		for ny in hyps.lemma_names()
+			synonyms.append(ny)
+
 	return list(synonyms)
 
 # def synonymMaker(word, sent, posTag):
@@ -328,12 +340,12 @@ def driver(sentence1, sentence2):
 		return sentence1, sentence2
 	else:
 		return candidates[0][0].split(' '), candidates[0][1].split(' ')
-#if __name__ == '__main__':
+if __name__ == '__main__':
 	# dependencyParser('The man shot an elephant in his sleep')
 	# print(posTag('The ram quickly jumps over the brown log'))
 	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
-	# print(driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'}))
+	print(driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'}))
 	# driver(['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], ['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'])
 	# nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])

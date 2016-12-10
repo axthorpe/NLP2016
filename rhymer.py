@@ -11,10 +11,9 @@ import spacy
 import copy
 from nltk import Tree
 from nltk.parse.stanford import StanfordParser
-stanford_parser_dir = '/home/stanford/'
-eng_model_path = "/home/divya/stanford/englishRNN.ser.gz"
-my_path_to_models_jar = "/home/divya/stanford/tools/stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar"
-my_path_to_jar = "/home/divya/stanford/tools/stanford-parser-full-2015-12-09/stanford-parser.jar"
+eng_model_path = "./stanford/englishRNN.ser.gz"
+my_path_to_models_jar = "./stanford/stanford-parser-3.6.0-models.jar"
+my_path_to_jar = "./stanford/stanford-parser.jar"
 parser=StanfordParser(model_path=eng_model_path, path_to_models_jar=my_path_to_models_jar, path_to_jar=my_path_to_jar)
 
 

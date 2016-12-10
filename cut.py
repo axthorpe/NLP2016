@@ -190,6 +190,8 @@ def to_nltk_tree(node):
         return node.orth_
 
 def traverseTree(tree):
+    #print("tree:", tree)
+    print(tree.label())
     tree.set_label(str(tree.label()))
     for i in range(len(tree)):
         if type(tree[i]) == nltk.tree.Tree:
@@ -202,7 +204,9 @@ def traverseTree2(tree, paths, prop_word, num):
 	if len(paths) != 0 :
 		paths[-1][1] = num
 	if not isinstance(tree, nltk.tree.Tree):
+		print(tree)
 		if tree == prop_word:
+			print(prop_word+ "*****************************")
 			result = paths
 			return False
 		return True
@@ -221,16 +225,22 @@ def propogate(dtree, path):
 		if num <= len(tree)-1:
 			temp = tree.pop(num)
 			tree.append(temp)
+		print('------------')
+		tree.pretty_print()
+		print(num)
+		print('------------')
 
 def dependencyParser2(sentence, prop_word):
 	global result
 	dep_tree = parser.raw_parse(sentence).next()
-	# dep_tree.pretty_print()
+	dep_tree.pretty_print()
 	paths = []
 	result = []
 	traverseTree2(dep_tree, paths, prop_word, 0)
+	for i in result:
+		print(i[0].label() + ' ' + str(i[1]))
 	propogate(dep_tree, result)
-	# dep_tree.pretty_print()
+	dep_tree.pretty_print()
 	sent = ''
 	for l in dep_tree.leaves():
 		sent = sent + l + ' '
@@ -246,7 +256,9 @@ def dependencyParser(sentence, prop_word):
 	nltk_tree = None
 	for sent in doc.sents:
 		nltk_tree = to_nltk_tree(sent.root)
+	print(nltk_tree)
 	traverseTree(nltk_tree)
+	print(nltk_tree)
 	print("---------------_")
 	nltk_tree.chomsky_normal_form()
 	for p in nltk_tree.productions():
@@ -403,8 +415,12 @@ def driver(sentence1, sentence2):
 													print("------------------------------")
 													if [propped_sent1, propped_sent2] not in candidates:
 														candidates.append([propped_sent1, propped_sent2])
-													print(propped_sent1)
-													print(propped_sent2)
+													print(syn1)
+													print(syn2)
+													print(firstSentence)
+													print(secondSentence)
+													print(changed_sent1)
+													print(changed_sent2)
 													#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
 													print("------------------------------")
 													#print(syn1 + "   " + syn2)
@@ -420,7 +436,7 @@ if __name__ == '__main__':
 	# print(posTag('The ram quickly jumps over the brown log'))
 	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
-	driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'})
+	print(driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'}))
 	# print(driverDriver({'sent':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'ctx':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'stress':'030300300'},{'sent':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'ctx':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'stress':'030300300'}))
 	# sent1 = 'The wild giraffe enshroud in the forest to evade predators'
 	# sent2 = 'The proud lion eats deer every day'

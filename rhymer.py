@@ -9,6 +9,13 @@ import pickle
 import spacy
 import copy
 from nltk import Tree
+from nltk.parse.stanford import StanfordParser
+stanford_parser_dir = '/home/stanford/'
+eng_model_path = "/home/divya/stanford/englishRNN.ser.gz"
+my_path_to_models_jar = "/home/divya/stanford/tools/stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar"
+my_path_to_jar = "/home/divya/stanford/tools/stanford-parser-full-2015-12-09/stanford-parser.jar"
+parser=StanfordParser(model_path=eng_model_path, path_to_models_jar=my_path_to_models_jar, path_to_jar=my_path_to_jar)
+
 
 nlp = English()
 file1 = open('word_to_rhyme_group.pickle', 'rb')
@@ -38,25 +45,32 @@ def posTag(sentence):
 			continue
 	print(pos_tags)
 
+# def synonymMaker(word, sent):
+# 	synonyms = []
+# 	synset_word = lesk(sent, word)
+# 	if not synset_word:
+# 		return None
+
+# 	for syn in synset_word.lemmas():
+# 		synonyms.append(syn.name())
+# 	hypos = synset_word.hyponyms()
+
+# 	for hyps in hypos:
+# 		for ny in hyps.lemma_names():
+# 			synonyms.append(ny)
+# 	hypers = synset_word.hypernyms()
+
+# 	for hyps in hypers:
+# 		for ny in hyps.lemma_names():
+# 			synonyms.append(ny)
+
+# 	return list(synonyms)
+
 def synonymMaker(word, sent):
 	synonyms = []
-	synset_word = lesk(sent, word)
-	if not synset_word:
-		return None
-
-	for syn in synset_word.lemmas():
-		synonyms.append(syn.name())
-	hypos = synset_word.hyponyms()
-
-	for hyps in hypos:
-		for ny in hyps.lemma_names()
-			synonyms.append(ny)
-	hypers = synset_word.hypernyms()
-
-	for hyps in hypers:
-		for ny in hyps.lemma_names()
-			synonyms.append(ny)
-
+	for syn in wordnet.synsets(word):
+	    for l in syn.lemmas():
+	        synonyms.append(l.name())
 	return list(synonyms)
 
 # def synonymMaker(word, sent, posTag):
@@ -138,7 +152,6 @@ def rhymeMaker(word):
 
 def printTree(n, text_of_interest):
 	global print_script
-	print(n.tag)
 	if len(n.children) == 0:
 		print_script = print_script +  (n.val) + ' '
 	elif n.val == text_of_interest:
@@ -176,11 +189,34 @@ def to_nltk_tree(node):
     else:
         return node.orth_
 
+def traverseTree(tree):
+    #print("tree:", tree)
+    print(tree.label())
+    tree.set_label(str(tree.label()))
+    for i in range(len(tree)):
+        if type(tree[i]) == nltk.tree.Tree:
+            traverseTree(tree[i])
+        else:
+        	tree[i] = Tree(str(tree[i]), [])
+
 def dependencyParser(sentence, prop_word):
 	global print_script
 	nodes = []
 	doc = nlp(sentence)
 	[to_nltk_tree(sent.root).pretty_print() for sent in doc.sents]
+	nltk_tree = None
+	for sent in doc.sents:
+		nltk_tree = to_nltk_tree(sent.root)
+	print(nltk_tree)
+	traverseTree(nltk_tree)
+	print(nltk_tree)
+	print("---------------_")
+	nltk_tree.chomsky_normal_form()
+	for p in nltk_tree.productions():
+		print(p)
+	print("---------------")
+	# [to_nltk_tree(sent.root).chomsky_normal_form().pretty_print() for sent in doc.sents]
+	
 	for sent in doc.sents:
 		r = sent.root
 		# emptyNode = spacy.tokens.token.Token(None,None,0)
@@ -188,7 +224,6 @@ def dependencyParser(sentence, prop_word):
 		# r.head = emptyNode
 		n = Node(r.text)
 		n.tag = r.pos_
-		print('root: ' + r.text)
 		running = True
 		list_of_nodes = []
 		list_of_mynodes = []
@@ -244,11 +279,11 @@ def dependencyParser(sentence, prop_word):
 			node_of_interest = parent
 		print_script = ''
 		printTree(n, text_of_interest)
-		return print_script
 	for sent in doc.sents:
 		for token in sent:
 			if token.is_alpha:
 				print token.head.lemma_, token.tag_, token.orth_
+	return print_script
 
 def driverDriver(dict1, dict2):
 	ret1, ret2 = driver(dict1['sent'], dict2['sent'])
@@ -326,7 +361,8 @@ def driver(sentence1, sentence2):
 												propped_sent1 = dependencyParser(changed_sent1, syn1)
 												propped_sent2 = dependencyParser(changed_sent2, syn2)
 												print("------------------------------")
-												candidates.append([propped_sent1, propped_sent2])
+												if [propped_sent1, propped_sent2] not in candidates:
+													candidates.append([propped_sent1, propped_sent2])
 												print(syn1)
 												print(syn2)
 												print(firstSentence)
@@ -336,6 +372,9 @@ def driver(sentence1, sentence2):
 												#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
 												print("------------------------------")
 												#print(syn1 + "   " + syn2)
+	for candidate in candidates:
+		print(candidate[0])
+		print(candidate[1])
 	if len(candidates) == 0:
 		return sentence1, sentence2
 	else:
@@ -345,7 +384,15 @@ if __name__ == '__main__':
 	# print(posTag('The ram quickly jumps over the brown log'))
 	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
-	print(driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'}))
+	# print(driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'}))
+	# print(driverDriver({'sent':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'ctx':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'stress':'030300300'},{'sent':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'ctx':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'stress':'030300300'}))
+	sent1 = 'The wild giraffe enshroud in the forest to evade predators'
+	sent2 = 'The proud lion eats deer every day'
+	dependencyParser(unicode(sent1), 'enshroud')
+	dependencyParser(unicode(sent2), 'proud')
+	#print(driverDriver({'sent':sent1.split(), 'ctx':sent1.split(), 'stress':'030300300'},{'sent':sent2.split(), 'ctx':sent2.split(), 'stress':'030300300'}))
+	# print(driverDriver({'sent':['The', 'dog', 'played', 'outside', 'until', 'he', 'got', 'tired'], 'ctx':['The', 'dog', 'played', 'outside', 'until', 'he', 'got', 'tired'], 'stress':'030300300'},{'sent':['The', 'cat', 'sat', 'on', 'the', 'couch', 'and', 'licked', 'itself', 'clean'], 'ctx':['The', 'cat', 'sat', 'on', 'the', 'couch', 'and', 'licked', 'itself', 'clean'], 'stress':'030300300'}))
+
 	# driver(['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], ['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'])
 	# nodes = dependencyParser("The fox quickly jumps over the brown log")
 	# printTree(nodes[0])

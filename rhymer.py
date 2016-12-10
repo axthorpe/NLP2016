@@ -9,6 +9,7 @@ import pickle
 import spacy
 import copy
 from nltk import Tree
+import stress
 
 nlp = English()
 file1 = open('word_to_rhyme_group.pickle', 'rb')
@@ -36,7 +37,7 @@ def posTag(sentence):
 	for tag in pos_tags:
 		if tag[1] == 'DT':
 			continue
-	print(pos_tags)
+	#print(pos_tags)
 
 def synonymMaker(word, sent):
 	synonyms = []
@@ -49,12 +50,12 @@ def synonymMaker(word, sent):
 	hypos = synset_word.hyponyms()
 
 	for hyps in hypos:
-		for ny in hyps.lemma_names()
+		for ny in hyps.lemma_names():
 			synonyms.append(ny)
 	hypers = synset_word.hypernyms()
 
 	for hyps in hypers:
-		for ny in hyps.lemma_names()
+		for ny in hyps.lemma_names():
 			synonyms.append(ny)
 
 	return list(synonyms)
@@ -138,7 +139,7 @@ def rhymeMaker(word):
 
 def printTree(n, text_of_interest):
 	global print_script
-	print(n.tag)
+	#print(n.tag)
 	if len(n.children) == 0:
 		print_script = print_script +  (n.val) + ' '
 	elif n.val == text_of_interest:
@@ -180,7 +181,7 @@ def dependencyParser(sentence, prop_word):
 	global print_script
 	nodes = []
 	doc = nlp(sentence)
-	[to_nltk_tree(sent.root).pretty_print() for sent in doc.sents]
+	#[to_nltk_tree(sent.root).pretty_print() for sent in doc.sents]
 	for sent in doc.sents:
 		r = sent.root
 		# emptyNode = spacy.tokens.token.Token(None,None,0)
@@ -188,7 +189,7 @@ def dependencyParser(sentence, prop_word):
 		# r.head = emptyNode
 		n = Node(r.text)
 		n.tag = r.pos_
-		print('root: ' + r.text)
+		#print('root: ' + r.text)
 		running = True
 		list_of_nodes = []
 		list_of_mynodes = []
@@ -244,11 +245,12 @@ def dependencyParser(sentence, prop_word):
 			node_of_interest = parent
 		print_script = ''
 		printTree(n, text_of_interest)
+
 		return print_script
-	for sent in doc.sents:
-		for token in sent:
-			if token.is_alpha:
-				print token.head.lemma_, token.tag_, token.orth_
+	#for sent in doc.sents:
+	#	for token in sent:
+	#		if token.is_alpha:
+	#			print token.head.lemma_, token.tag_, token.orth_
 
 def driverDriver(dict1, dict2):
 	ret1, ret2 = driver(dict1['sent'], dict2['sent'])
@@ -256,10 +258,10 @@ def driverDriver(dict1, dict2):
 	new_dict2 = {}
 	new_dict1['sent'] = ret1
 	new_dict1['ctx'] = dict1['ctx']
-	new_dict1['stress'] = dict1['stress']
+	new_dict1['stress'] = stress.getBeatFromSentence((' '.join((ret1[a]) for a in range(len(ret1)))))[1].split()
 	new_dict2['sent'] = ret2
 	new_dict2['ctx'] = dict2['ctx']
-	new_dict2['stress'] = dict2['stress']
+	new_dict2['stress'] = stress.getBeatFromSentence((' '.join((ret2[a]) for a in range(len(ret2)))))[1].split()
 	return new_dict1, new_dict2
 
 def driver(sentence1, sentence2):
@@ -293,7 +295,7 @@ def driver(sentence1, sentence2):
 		if synonyms1 != None:	
 			for l,word2 in enumerate(secondSentence):
 				#if word1 == word2:
-				print(word1 + "*******" + word2)
+				#print(word1 + "*******" + word2)
 				synonyms2 = synonymMaker(word2, secondSentence)
 				if synonyms2 != None:
 					for i in range(len(synonyms1)):
@@ -323,23 +325,45 @@ def driver(sentence1, sentence2):
 												for wd in sample_sent2:
 													changed_sent2 = changed_sent2 + wd + ' '
 												changed_sent2 = changed_sent2[:-1]
-												propped_sent1 = dependencyParser(changed_sent1, syn1)
-												propped_sent2 = dependencyParser(changed_sent2, syn2)
+												propped_sent1 = dependencyParser(changed_sent1, syn1).split()
+												propped_sent2 = dependencyParser(changed_sent2, syn2).split()
+												if propped_sent1[-1] != syn1:
+													p1_idx = propped_sent1.index(syn1)
+													print(p1_idx)
+													temp_p1 = propped_sent1[:p1_idx]
+													temp_p1.extend(propped_sent1[p1_idx + 1:])
+													temp_p1.append(syn1)
+													propped_sent1 = temp_p1
+
+												if propped_sent2[-1] != syn2:
+													p2_idx = propped_sent2.index(syn2)
+													print(p2_idx)
+													temp_p2 = propped_sent2[:p2_idx]
+													temp_p2.extend(propped_sent2[p2_idx + 1:])
+													temp_p2.append(syn2)
+													propped_sent2 = temp_p2
+
 												print("------------------------------")
 												candidates.append([propped_sent1, propped_sent2])
+												print(candidates)
 												print(syn1)
 												print(syn2)
-												print(firstSentence)
-												print(secondSentence)
-												print(changed_sent1)
-												print(changed_sent2)
+												#print(firstSentence)
+												#print(secondSentence)
+												#print(changed_sent1)
+												#print(changed_sent2)
 												#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
 												print("------------------------------")
 												#print(syn1 + "   " + syn2)
 	if len(candidates) == 0:
 		return sentence1, sentence2
 	else:
-		return candidates[0][0].split(' '), candidates[0][1].split(' ')
+		print("Our new sentence is THIS:")
+		print("--------------------------")
+		print(candidates[0][0])
+		print(candidates[0][1])
+		print("--------------------------")
+		return candidates[0][0], candidates[0][1]
 if __name__ == '__main__':
 	# dependencyParser('The man shot an elephant in his sleep')
 	# print(posTag('The ram quickly jumps over the brown log'))

@@ -54,7 +54,7 @@ def population(indiv):
 	"""
 	pop = []
 	#print(indiv)
-	for i in range(0, 200):
+	for i in range(0, 50):
 		new_one = copy.deepcopy(indiv)
 		if len(indiv['sent']) > 2:
 			pop.append(mutate(new_one, random.randint(0, len(indiv['sent']) -2)))
@@ -206,18 +206,20 @@ def get_likelihood_score(indiv):
 		word = indiv['ctx'][i].lower()
 		next = indiv['ctx'][i+1].lower()
 		try:
-			prob -= ngram[word][next]
+			prob += ngram[word][next]
+			print(prob)
 		except:
 			print("dis not in here")
-			prob -= 5
+			prob += (-5)
 	for i in range(1, len(indiv['ctx'])):
 		word = indiv['ctx'][i].lower()
 		prev = indiv['ctx'][i-1].lower()
 		try:
-			prob -= ngram_rev[prev][word]
+			prob += ngram_rev[prev][word]
+			print(prob)
 		except:
 			print("dis not in here")
-			prob -= 5
+			prob += (-5)
 
 	return 10*(np.exp(prob))
 
@@ -367,7 +369,7 @@ if __name__ == "__main__":
 		dicts.append(mini_dict)
 
 	# call divyas function, pass in dicts[i], and dicts[i+1]
-	"""
+	
 	rhyme_dicts = []
 	print("About to create our rhymes!")
 	for i in range(0, len(dicts) - 1, 2):
@@ -387,10 +389,10 @@ if __name__ == "__main__":
 
 	for rhym in rhyme_dicts:
 		print(rhym['sent'])
-	"""
+	
 	count = 0
 	evolved_sents = []
-	for t_dict in dicts:
+	for t_dict in rhyme_dicts:
 		pop = population(t_dict)
 		#print(best_song)
 		if count == len(num_beats):
@@ -401,7 +403,7 @@ if __name__ == "__main__":
 		#print(k[0]['sent'])
 		#print(fitness(t_dict, best_song[0]))
 
-		for i in range(0, 1000):
+		for i in range(0, 800):
 			pop = evolve(pop, target)
 
 		target_str = ''.join((target[j]) for j in range(0, len(target)))

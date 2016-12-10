@@ -95,14 +95,14 @@ def tupToDict(tup, idx):
 	t_dict = {}
 	t_dict['stress'] = []
 	t_dict['sent'] = []
-	t_dict['ctx'] = Set()
+	t_dict['ctx'] = []
 
 	for word in tup[idx]:
 		t_dict['stress'].append(word[0].lower())
 		t_dict['sent'].append(word[1].lower())
 		for w in nltk.word_tokenize(word[2]):
 			if w not in t_dict['ctx']:
-				t_dict['ctx'].add(w.lower())
+				t_dict['ctx'].append(w.lower())
 
 	new_list = []
 	for c in t_dict['ctx']:

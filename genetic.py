@@ -54,7 +54,7 @@ def population(indiv):
 	"""
 	pop = []
 	#print(indiv)
-	for i in range(0, 50):
+	for i in range(0, 200):
 		new_one = copy.deepcopy(indiv)
 		if len(indiv['sent']) > 2:
 			pop.append(mutate(new_one, random.randint(0, len(indiv['sent']) -2)))
@@ -207,18 +207,18 @@ def get_likelihood_score(indiv):
 		next = indiv['ctx'][i+1].lower()
 		try:
 			prob += ngram[word][next]
-			print(prob)
+			#print(prob)
 		except:
-			print("dis not in here")
+			#print("dis not in here")
 			prob += (-5)
 	for i in range(1, len(indiv['ctx'])):
 		word = indiv['ctx'][i].lower()
 		prev = indiv['ctx'][i-1].lower()
 		try:
 			prob += ngram_rev[prev][word]
-			print(prob)
+			#print(prob)
 		except:
-			print("dis not in here")
+			#print("dis not in here")
 			prob += (-5)
 
 	return 10*(np.exp(prob))
@@ -315,7 +315,7 @@ def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.20):
 	modified_parents.extend(children)
 	return modified_parents
 
-mutations = [hypernym_substitution, synonym_substitution, one_syllable_flipper, contracter]
+mutations = [hyponym_substitution, synonym_substitution, one_syllable_flipper]
 d = cmudict.dict()
 
 if __name__ == "__main__":
@@ -326,20 +326,25 @@ if __name__ == "__main__":
 
 	#fitness(t_dict, target_stress)
 
-	ny = wikipedia.page('New York')
-	sects = ny.sections #it's a list 
-	sandy_section = ny.section(ny.sections[8])
+	#ny = wikipedia.page('New York')
+	# sects = ny.sections #it's a list 
+	# sandy_section = ny.section(ny.sections[8])
 
 	#best_song, num_beats = music.getBestSong()
 	#sample = "Jefferson was primarily of English ancestry, born and educated in Virginia. He graduated from the College of William and Mary and briefly practiced law, at times defending slaves seeking their freedom. During the American Revolution, he represented Virginia in the Continental Congress that adopted the Declaration, drafted the law for religious freedom as a Virginia legislator, and served as a wartime governor. He became the United States Minister to France in May time, and subsequently the nation's first Secretary of State a year later under President George Washington. Jefferson and James Madison organized the Democratic Republican Party to oppose the Federalist Party during the formation of the First Party System. With Madison, he anonymously wrote the Kentucky and Virginia Resolutions later, which sought to embolden states rights in opposition to the national government by nullifying the Alien and Sedition Acts. As President, Jefferson pursued the nations shipping and trade interests against Barbary pirates and aggressive British trade policies. He also organized the Louisiana Purchase, almost doubling the countries territory. As a result of peace negotiations with France, his administration reduced military forces. He was reelected at a later time. The second term of Jefferson was beset with difficulties at home, including the trial of former Vice President Aaron Burr. American foreign trade was diminished when Jefferson implemented the Embargo Act of time, responding to British threats to United States shipping. In time, Jefferson began a controversial process of Indian tribe removal to the newly organized Louisiana Territory, and he signed the Act Prohibiting Importation of Slaves in time."
 	#sample = "that good old song of element we sing it oar and oar. It cheers are hearts and warms are blood to hear them shout and roar. we come from old Virginia where all is bright and gay. gets all join hands and give a yell for the dear old bread and gay"
-	sample = "The number of cells in a plant is always increasing. Plants gain energy through the sun. Their leaves have a way of absorbing sun light and converting it into sugar"
+	#sample = "The number of cells in a plant is always increasing. Plants gain energy through the sun. Their leaves have a way of absorbing sun light and converting it into sugar"
 	#sample = "There are four main ways that a dog "
+	#sample = "The dog walked all around the world looking for a place to eat food. It finally found a little house on the prairie. The dog walked into the house and ate some roasted chicken!"
+	sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
 	tup = st.getBeatFromParagraph(sample)
 	print(tup)
 
 	#good_old_song = "that good old song of element we sing it oar and oar\nIt cheers are hearts and warms are blood to hear them shout and roar\nwe come from old Virginia where all is bright and gay\nlets all join hands and give a yell for the dear old element"
-	good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	#good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	
+	good_old_song = "Well the years start coming and they don't stop coming\nFed to the rules and I hit the ground running\nDidn't make sense not to live for fun\nYour brain gets smart but your head gets dumb\nSo much to do, so much to see\nSo what's wrong with taking the back streets\nYou'll never know if you don't go\nYou'll never shine if you don't glow"
+
 	stresses = []
 	num_beats = []
 	for line in good_old_song.split('\n'):
@@ -367,6 +372,7 @@ if __name__ == "__main__":
 	for i in range(0, len(pattern)):
 		mini_dict = st.tupToDict(pattern, i)
 		dicts.append(mini_dict)
+	print(dicts)
 
 	# call divyas function, pass in dicts[i], and dicts[i+1]
 	
@@ -403,7 +409,7 @@ if __name__ == "__main__":
 		#print(k[0]['sent'])
 		#print(fitness(t_dict, best_song[0]))
 
-		for i in range(0, 800):
+		for i in range(0, 1000):
 			pop = evolve(pop, target)
 
 		target_str = ''.join((target[j]) for j in range(0, len(target)))

@@ -11,9 +11,10 @@ import spacy
 import copy
 from nltk import Tree
 from nltk.parse.stanford import StanfordParser
-eng_model_path = "./stanford/englishRNN.ser.gz"
-my_path_to_models_jar = "./stanford/stanford-parser-3.6.0-models.jar"
-my_path_to_jar = "./stanford/stanford-parser.jar"
+parent = '/home/ubuntu/stanford/'
+eng_model_path = parent + "englishRNN.ser.gz"
+my_path_to_models_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar"
+my_path_to_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser.jar"
 parser=StanfordParser(model_path=eng_model_path, path_to_models_jar=my_path_to_models_jar, path_to_jar=my_path_to_jar)
 
 
@@ -45,33 +46,33 @@ def posTag(sentence):
 			continue
 	print(pos_tags)
 
-# def synonymMaker(word, sent):
-# 	synonyms = []
-# 	synset_word = lesk(sent, word)
-# 	if not synset_word:
-# 		return None
-
-# 	for syn in synset_word.lemmas():
-# 		synonyms.append(syn.name())
-# 	hypos = synset_word.hyponyms()
-
-# 	for hyps in hypos:
-# 		for ny in hyps.lemma_names():
-# 			synonyms.append(ny)
-# 	hypers = synset_word.hypernyms()
-
-# 	for hyps in hypers:
-# 		for ny in hyps.lemma_names():
-# 			synonyms.append(ny)
-
-# 	return list(synonyms)
-
 def synonymMaker(word, sent):
 	synonyms = []
-	for syn in wordnet.synsets(word):
-	    for l in syn.lemmas():
-	        synonyms.append(l.name())
+	synset_word = lesk(sent, word)
+	if not synset_word:
+		return None
+
+	for syn in synset_word.lemmas():
+		synonyms.append(syn.name())
+	hypos = synset_word.hyponyms()
+
+	for hyps in hypos:
+		for ny in hyps.lemma_names():
+			synonyms.append(ny)
+	hypers = synset_word.hypernyms()
+
+	for hyps in hypers:
+		for ny in hyps.lemma_names():
+			synonyms.append(ny)
+
 	return list(synonyms)
+
+# def synonymMaker(word, sent):
+# 	synonyms = []
+# 	for syn in wordnet.synsets(word):
+# 	    for l in syn.lemmas():
+# 	        synonyms.append(l.name())
+# 	return list(synonyms)
 
 # def synonymMaker(word, sent, posTag):
 # 	synonyms = []
@@ -383,7 +384,7 @@ def driver(sentence1, sentence2):
 									if rhymes2 != None:
 										if rhymes2.strip() != '':
 											if str(rhymes1[((str(rhymes1)).index('\n')):]) == str(rhymes2[((str(rhymes2)).index('\n')):]):
-												if not [rhymes1, rhymes2] in matched_rhymes and not[rhymes2, rhymes1] in matched_rhymes:
+												if not [rhymes1, rhymes2] in matched_rhymes and not[rhymes2, rhymes1] in matched_rhymes and syn1 != syn2:
 													sample_sent1 = firstSentence[:]	
 													sample_sent2 = secondSentence[:]
 													sample_sent1[k] = syn1

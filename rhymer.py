@@ -367,47 +367,48 @@ def driver(sentence1, sentence2):
 			for l,word2 in enumerate(secondSentence):
 				#if word1 == word2:
 				print(word1 + "*******" + word2)
-				synonyms2 = synonymMaker(word2, secondSentence)
-				if synonyms2 != None:
-					for i in range(len(synonyms1)):
-						syn1 = synonyms1[i]
-						if '_' in syn1:
-							syn1 = syn1[len(syn1) - syn1[::-1].index('_'):]
-						rhymes1 = rhymeMaker(syn1)
-						if rhymes1 != None:
-							if rhymes1.strip() != '':
-								for j in range(len(synonyms2)):
-									syn2 = synonyms2[j]
-									if '_' in syn2:
-										syn2 = syn2[len(syn2) - syn2[::-1].index('_'):]
-									rhymes2 = rhymeMaker(syn2)
-									if rhymes2 != None:
-										if rhymes2.strip() != '':
-											if str(rhymes1[((str(rhymes1)).index('\n')):]) == str(rhymes2[((str(rhymes2)).index('\n')):]):
-												if not [rhymes1, rhymes2] in matched_rhymes and not[rhymes2, rhymes1] in matched_rhymes and syn1 != syn2:
-													sample_sent1 = firstSentence[:]	
-													sample_sent2 = secondSentence[:]
-													sample_sent1[k] = syn1
-													sample_sent2[l] = syn2
-													changed_sent1 = ''
-													changed_sent2 = ''
-													for wd in sample_sent1:
-														changed_sent1 = changed_sent1 + wd + ' '
-													changed_sent1 = changed_sent1[:-1]
-													for wd in sample_sent2:
-														changed_sent2 = changed_sent2 + wd + ' '
-													changed_sent2 = changed_sent2[:-1]
-													propped_sent1 = dependencyParser2(changed_sent1, syn1)
-													propped_sent2 = dependencyParser2(changed_sent2, syn2)
-													matched_rhymes.append([rhymes1, rhymes2])
-													print("------------------------------")
-													if [propped_sent1, propped_sent2] not in candidates:
-														candidates.append([propped_sent1, propped_sent2])
-													print(propped_sent1)
-													print(propped_sent2)
-													#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
-													print("------------------------------")
-													#print(syn1 + "   " + syn2)
+				if word1 != word2:
+					synonyms2 = synonymMaker(word2, secondSentence)
+					if synonyms2 != None:
+						for i in range(len(synonyms1)):
+							syn1 = synonyms1[i]
+							if '_' in syn1:
+								syn1 = syn1[len(syn1) - syn1[::-1].index('_'):]
+							rhymes1 = rhymeMaker(syn1)
+							if rhymes1 != None:
+								if rhymes1.strip() != '':
+									for j in range(len(synonyms2)):
+										syn2 = synonyms2[j]
+										if '_' in syn2:
+											syn2 = syn2[len(syn2) - syn2[::-1].index('_'):]
+										rhymes2 = rhymeMaker(syn2)
+										if rhymes2 != None:
+											if rhymes2.strip() != '':
+												if str(rhymes1[((str(rhymes1)).index('\n')):]) == str(rhymes2[((str(rhymes2)).index('\n')):]):
+													if not [rhymes1, rhymes2] in matched_rhymes and not[rhymes2, rhymes1] in matched_rhymes and syn1 != syn2:
+														sample_sent1 = firstSentence[:]	
+														sample_sent2 = secondSentence[:]
+														sample_sent1[k] = syn1
+														sample_sent2[l] = syn2
+														changed_sent1 = ''
+														changed_sent2 = ''
+														for wd in sample_sent1:
+															changed_sent1 = changed_sent1 + wd + ' '
+														changed_sent1 = changed_sent1[:-1]
+														for wd in sample_sent2:
+															changed_sent2 = changed_sent2 + wd + ' '
+														changed_sent2 = changed_sent2[:-1]
+														propped_sent1 = dependencyParser2(changed_sent1, syn1)
+														propped_sent2 = dependencyParser2(changed_sent2, syn2)
+														matched_rhymes.append([rhymes1, rhymes2])
+														print("------------------------------")
+														if [propped_sent1, propped_sent2] not in candidates:
+															candidates.append([propped_sent1, propped_sent2])
+														print(propped_sent1)
+														print(propped_sent2)
+														#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
+														print("------------------------------")
+														#print(syn1 + "   " + syn2)
 	for candidate in candidates:
 		print(candidate[0])
 		print(candidate[1])

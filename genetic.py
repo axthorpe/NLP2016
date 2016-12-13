@@ -197,14 +197,14 @@ def mutate(indiv, idx):
 	mutated_sentence = random.choice(mutations)(indiv, idx)
 	return mutated_sentence
 
-def get_likelihood_score(indiv):
+def get_likelihood_score(sent):
 	prob = 0.0
 	#ngram_rev['jefferson']['thomas'] = -1.7
 	#ngram['thomas']['jefferson']
 	#for word in indiv['ctx']:
 	for i in range(0, len(indiv['ctx']) - 1):
-		word = indiv['ctx'][i].lower()
-		next = indiv['ctx'][i+1].lower()
+		word = sent[i].lower()
+		next = sent[i+1].lower()
 		try:
 			prob += ngram[word][next]
 			#print(prob)
@@ -212,8 +212,8 @@ def get_likelihood_score(indiv):
 			#print("dis not in here")
 			prob += (-5)
 	for i in range(1, len(indiv['ctx'])):
-		word = indiv['ctx'][i].lower()
-		prev = indiv['ctx'][i-1].lower()
+		word = sent[i].lower()
+		prev = sent[i-1].lower()
 		try:
 			prob += ngram_rev[prev][word]
 			#print(prob)

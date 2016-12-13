@@ -315,7 +315,7 @@ def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.20):
 	modified_parents.extend(children)
 	return modified_parents
 
-mutations = [hypernym_substitution, synonym_substitution, one_syllable_flipper, contracter]
+mutations = [hyponym_substitution, synonym_substitution, one_syllable_flipper]
 d = cmudict.dict()
 
 if __name__ == "__main__":
@@ -335,12 +335,16 @@ if __name__ == "__main__":
 	#sample = "that good old song of element we sing it oar and oar. It cheers are hearts and warms are blood to hear them shout and roar. we come from old Virginia where all is bright and gay. gets all join hands and give a yell for the dear old bread and gay"
 	#sample = "The number of cells in a plant is always increasing. Plants gain energy through the sun. Their leaves have a way of absorbing sun light and converting it into sugar"
 	#sample = "There are four main ways that a dog "
-	sample = "The dog walked all around the world looking for a place to eat food. It finally found a little house on the prairie. The dog walked into the house and ate some roasted chicken!"
+	#sample = "The dog walked all around the world looking for a place to eat food. It finally found a little house on the prairie. The dog walked into the house and ate some roasted chicken!"
+	sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
 	tup = st.getBeatFromParagraph(sample)
 	print(tup)
 
 	#good_old_song = "that good old song of element we sing it oar and oar\nIt cheers are hearts and warms are blood to hear them shout and roar\nwe come from old Virginia where all is bright and gay\nlets all join hands and give a yell for the dear old element"
-	good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	#good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	
+	good_old_song = "Well the years start coming and they don't stop coming\nFed to the rules and I hit the ground running\nDidn't make sense not to live for fun\nYour brain gets smart but your head gets dumb\nSo much to do, so much to see\nSo what's wrong with taking the back streets\nYou'll never know if you don't go\nYou'll never shine if you don't glow"
+
 	stresses = []
 	num_beats = []
 	for line in good_old_song.split('\n'):

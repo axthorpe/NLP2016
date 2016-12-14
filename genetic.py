@@ -16,6 +16,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 import numpy as np
 from nltk.corpus import brown
+import sys
 
 # train our likelihood model on front and back context of brown corpus
 ngram = defaultdict(lambda: defaultdict(int))
@@ -291,59 +292,17 @@ mutations = [hyponym_substitution, synonym_substitution, one_syllable_flipper]
 d = cmudict.dict()
 
 if __name__ == "__main__":
-	print("Hello world!")
 
-	#t_dict = {'stress':['0', '1', '110', '0'], 'sent':['the', 'a', 'manhattan', 'dog'], 'ctx':['There', 'was', 'the', 'a', 'manhattan', 'dog', 'in', 'the', 'park']}
-	#target_stress = ['1', '1', '101', '0']
+	information = str(sys.argv[1])
+	# will take wikipedia as first thing
+	wiki_info = wikipedia.page(information)
+	section = wiki_info.section(wiki_info.sections[8])
 
-	#fitness(t_dict, target_stress)
-
-	#ny = wikipedia.page('New York')
-	# sects = ny.sections #it's a list 
-	# sandy_section = ny.section(ny.sections[8])
-
-	#best_song, num_beats = music.getBestSong()
-	#sample = "Jefferson was primarily of English ancestry, born and educated in Virginia. He graduated from the College of William and Mary and briefly practiced law, at times defending slaves seeking their freedom. During the American Revolution, he represented Virginia in the Continental Congress that adopted the Declaration, drafted the law for religious freedom as a Virginia legislator, and served as a wartime governor. He became the United States Minister to France in May time, and subsequently the nation's first Secretary of State a year later under President George Washington. Jefferson and James Madison organized the Democratic Republican Party to oppose the Federalist Party during the formation of the First Party System. With Madison, he anonymously wrote the Kentucky and Virginia Resolutions later, which sought to embolden states rights in opposition to the national government by nullifying the Alien and Sedition Acts. As President, Jefferson pursued the nations shipping and trade interests against Barbary pirates and aggressive British trade policies. He also organized the Louisiana Purchase, almost doubling the countries territory. As a result of peace negotiations with France, his administration reduced military forces. He was reelected at a later time. The second term of Jefferson was beset with difficulties at home, including the trial of former Vice President Aaron Burr. American foreign trade was diminished when Jefferson implemented the Embargo Act of time, responding to British threats to United States shipping. In time, Jefferson began a controversial process of Indian tribe removal to the newly organized Louisiana Territory, and he signed the Act Prohibiting Importation of Slaves in time."
-	#sample = "that good old song of element we sing it oar and oar. It cheers are hearts and warms are blood to hear them shout and roar. we come from old Virginia where all is bright and gay. gets all join hands and give a yell for the dear old bread and gay"
-	#sample = "The number of cells in a plant is always increasing. Plants gain energy through the sun. Their leaves have a way of absorbing sun light and converting it into sugar"
-	#sample = "There are four main ways that a dog "
-	#sample = "The dog walked all around the world looking for a place to eat food. It finally found a little house on the prairie. The dog walked into the house and ate some roasted chicken!"
-	#sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
-	#sample = "Termites eat through wood two times faster when listening to rock music!\n"
-	#sample = "Not all trees have all the organs or parts as mentioned above. For example, most palm trees are not branched, the cactus of North America has no functional leaves, tree ferns do not produce bark. Based on their general shape and size, all of these are nonetheless generally regarded as trees. Trees can vary very much. A plant form that is similar to a tree, but generally having smaller, multiple trunks and branches that arise near the ground, is called a shrub or a bush. Even though that is true, no precise differentiation between shrubs and trees is possible. Given their small size, bonsai plants would not technically be trees, but one should not confuse reference to the form of a species with the size or shape of individual specimens. A spruce seedling does not fit the definition of a tree, but all spruces are trees."
-	#sample = "Today, some dogs are used as pets, others are used to help humans do their work. They are a popular pet because they are usually playful, friendly, and listen to humans. Thirty million dogs in the United States are registered as pets. Dogs eat both meat and vegetables, often mixed together and sold in stores as dog food. Dogs often have jobs, including as police dogs, army dogs, assistance dogs, fire dogs, messenger dogs, hunting dogs, herding dogs, or rescue dogs. There are at least eight hundred breeds of dogs. Dogs whose parents were the same breed will also be that breed: these dogs are called purebred or pure pedigree dogs. Dogs with parents from different breeds no longer belong to one breed: they are called hybrids. Some of the most popular breeds are poodles and retrievers. It is becoming popular to breed together two different breeds of dogs and call the new dogs breed a name that is a mixture of the parents breeds two names. These dogs are normally used for prize shows and designer shows. They can be guide dogs."
-	#sample = "The earliest automobiles recorded were actually steam engines attached to wagons in the late eighteenth century. The steam engines were heavy and therefore the wagon was slow and hard to control. Better and faster steam cars became common late in the nineteenth century. Some cars in the early twentieth century were powered by electricity. They were slow and heavy and went out of use until the idea came back later in the century. The internal combustion engine changed the way automobiles were powered. The engine used either gasoline, diesel, or kerosene to work. When the gas is exploded in a cylinder it pushes the piston down and turns the wheel."
-	sample = "Tomato is a red fruit. It is shiny and smooth, and has many small seeds. The tomato is green when it is unripe. It is very sour and it is good for you. It slowly changes color from green to red as it gets more ripe. There are many different types of tomatoes. Most tomatoes are red, but some special kinds are yellow or orange when they are ripe. Also, some tomatoes are as small as strawberries, and some will become as big as apples. Tomatoes are used a lot in Italian food. They are also used to make ketchup. Sometimes, people mistake tomatoes for vegetables, but they are not, because they contain seeds. Tomato seeds are dispersed by being eaten by, and then passing through, animals."
-	tup = st.getBeatFromParagraph(sample)
-	#print(tup)
-
-	#good_old_song = "that good old song of element we sing it oar and oar\nIt cheers are hearts and warms are blood to hear them shout and roar\nwe come from old Virginia where all is bright and gay\nlets all join hands and give a yell for the dear old element"
-	good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	# will select the number one trending song as of now
+	best_song, num_beats = music.getBestSong()
 	
-	#good_old_song = "Well the years start coming and they don't stop coming\nFed to the rules and I hit the ground running\nDidn't make sense not to live for fun\nYour brain gets smart but your head gets dumb\nSo much to do, so much to see\nSo what's wrong with taking the back streets\nYou never know if you do go\nYou never shine if you do glow"
-
-	stresses = []
-	num_beats = []
-	for line in good_old_song.split('\n'):
-		words, curr_stress = st.getBeatFromSentence(line)
-		print(words, curr_stress)
-		if len(curr_stress) > 0:
-			stresses.append(curr_stress.split(' '))
-			num_num = 0
-			for striss in curr_stress.split(' '):
-				num_num += len(striss)
-			num_beats.append(num_num)
-
-	print("--------------------")
-	print(num_beats)
-	print("------------------------")
 	best_song = stresses
 	pattern = st.splitBeats(tup, num_beats)
-	#print(pattern)
-
-	#for patt in pattern:
-	#	print(patt[0])
-	#t_dict = st.tupToDict(pattern, 1)
 
 	dicts = []
 	for i in range(0, len(pattern)):
@@ -352,22 +311,21 @@ if __name__ == "__main__":
 
 	pre_score = 0.0
 	for i in range(0, len(dicts)):
-		#print("--------------------------")
-		#print(dicts[i]['sent'])
-		#print("--------------------------")
 		pre_score += getLevyScore(dicts[i]['stress'], stresses[0])
 
 	pre_score /= len(dicts)
 	print("The pre score is: " + str(pre_score))
-	#print(dicts)
 
-	# call divyas function, pass in dicts[i], and dicts[i+1]
 	rhyme_dicts = []
-	print("About to create our rhymes!")
+	total = 0.0
+	rhymed = 0
 	for i in range(0, len(dicts) - 1, 2):
 		if i < len(dicts) - 1:
 			#print('we in here')
-			rhyme_dict1, rhyme_dict2 = rhymer.driverDriver(dicts[i], dicts[i+1])
+			rhyme_dict1, rhyme_dict2,b = rhymer.driverDriver(dicts[i], dicts[i+1])
+			if b == True:
+				rhymed += 1
+			total += 1
 			#print(dicts[i]['sent'][0], dicts[i+1]['sent'][0])
 			for wrd in rhyme_dict1['sent']:
 				if wrd not in rhyme_dict1['ctx']: rhyme_dict1['ctx'].append(wrd)
@@ -377,8 +335,8 @@ if __name__ == "__main__":
 			rhyme_dicts.append(rhyme_dict2)
 		else:
 			rhyme_dicts.append(dicts[i])
-	print("Just created our rhymes!")
-
+	percent_rhyme = rhymed/total
+	print("PERCENT RHYME: " + str(percent_rhyme))
 	for rhym in rhyme_dicts:
 		print(rhym['sent'])
 	count = 0

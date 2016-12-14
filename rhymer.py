@@ -372,7 +372,7 @@ def dependencyParser(sentence, prop_word):
 	return print_script
 
 def driverDriver(dict1, dict2):
-	ret1, ret2 = driver(dict1['sent'], dict2['sent'])
+	ret1, ret2, b = driver(dict1['sent'], dict2['sent'])
 	new_dict1 = {}
 	new_dict2 = {}
 	new_dict1['sent'] = ret1
@@ -381,7 +381,7 @@ def driverDriver(dict1, dict2):
 	new_dict2['sent'] = ret2
 	new_dict2['ctx'] = dict2['ctx']
 	new_dict2['stress'] = dict2['stress']
-	return new_dict1, new_dict2
+	return new_dict1, new_dict2, b
 
 def driver(sentence1, sentence2):
 	candidates = []
@@ -467,12 +467,16 @@ def driver(sentence1, sentence2):
 														#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
 														print("------------------------------")
 														#print(syn1 + "   " + syn2)
+	b = True
 	for candidate in candidates:
 		print(candidate[0])
 		print(candidate[1])
 	if len(candidates) == 0:
-		return sentence1, sentence2
+		b = False
+		return sentence1, sentence2, b
 	else:
+		b = True
+		#Did rhyme
 		best1 = ''
 		best2 = ''
 		sum_score = 0
@@ -484,7 +488,8 @@ def driver(sentence1, sentence2):
 				best2 = candidate_pair[1]
 		print('Chose: ' + best1)
 		print('Chose: ' + best2)
-		return best1.split(' '), best2.split(' ')
+		return best1.split(' '), best2.split(' '), b
+
 if __name__ == '__main__':
 	# dependencyParser('The man shot an elephant in his sleep')
 	# print(posTag('The ram quickly jumps over the brown log'))

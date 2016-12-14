@@ -15,7 +15,7 @@ from nltk import Tree
 from nltk.parse.stanford import StanfordParser
 from collections import defaultdict
 
-parent = '/home/ubuntu/stanford/'
+parent = '/home/divya/stanford/'
 eng_model_path = parent + "englishRNN.ser.gz"
 my_path_to_models_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar"
 my_path_to_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser.jar"

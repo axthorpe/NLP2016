@@ -1,3 +1,13 @@
+import editdistance
+from nltk.corpus import wordnet as wn
+from nltk.wsd import lesk
+from nltk.corpus import cmudict
+import stress as st
+import random
+import music
+import wikipedia
+import copy
+import rhymer
 from nltk.corpus import brown
 from nltk.probability import LidstoneProbDist, WittenBellProbDist
 from collections import defaultdict
@@ -300,7 +310,7 @@ if __name__ == "__main__":
 	#sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
 	#sample = "Termites eat through wood two times faster when listening to rock music!\n"
 	#sample = "Not all trees have all the organs or parts as mentioned above. For example, most palm trees are not branched, the cactus of North America has no functional leaves, tree ferns do not produce bark. Based on their general shape and size, all of these are nonetheless generally regarded as trees. Trees can vary very much. A plant form that is similar to a tree, but generally having smaller, multiple trunks and branches that arise near the ground, is called a shrub or a bush. Even though that is true, no precise differentiation between shrubs and trees is possible. Given their small size, bonsai plants would not technically be trees, but one should not confuse reference to the form of a species with the size or shape of individual specimens. A spruce seedling does not fit the definition of a tree, but all spruces are trees."
-	sample = "Today, some dogs are used as pets, others are used to help humans do their work."# They are a popular pet because they are usually playful, friendly, and listen to humans. Thirty million dogs in the United States are registered as pets. Dogs eat both meat and vegetables, often mixed together and sold in stores as dog food. Dogs often have jobs, including as police dogs, army dogs, assistance dogs, fire dogs, messenger dogs, hunting dogs, herding dogs, or rescue dogs. There are at least eight hundred breeds of dogs. Dogs whose parents were the same breed will also be that breed: these dogs are called purebred or pure pedigree dogs. Dogs with parents from different breeds no longer belong to one breed: they are called hybrids. Some of the most popular breeds are poodles and retrievers. It is becoming popular to breed together two different breeds of dogs and call the new dogs breed a name that is a mixture of the parents breeds two names. These dogs are normally used for prize shows and designer shows. They can be guide dogs."
+	sample = "Food is what people and animals eat. Food usually comes from animals or plants. It is eaten by living things to provide energy and nutrition. Food contains the nutrition that people and animals need to be healthy. Food shortage is still a big problem in the world today. Many people do not have enough money to buy the food that they need. Bad weather or other problems sometimes destroy the growing food in one part of the world. When people do not have enough food, we say that they are hungry. If they do not eat enough food for a long time, they will become sick and die from starvation."
 
 	tup = st.getBeatFromParagraph(sample)
 	#print(tup)
@@ -352,10 +362,15 @@ if __name__ == "__main__":
 	# call divyas function, pass in dicts[i], and dicts[i+1]
 	rhyme_dicts = []
 	print("About to create our rhymes!")
+	total = 0
+	rhymed = 0
 	for i in range(0, len(dicts) - 1, 2):
 		if i < len(dicts) - 1:
 			#print('we in here')
-			rhyme_dict1, rhyme_dict2 = rhymer.driverDriver(dicts[i], dicts[i+1])
+			rhyme_dict1, rhyme_dict2,b = rhymer.driverDriver(dicts[i], dicts[i+1])
+			if b = True:
+				rhymed += 1
+			total += 1
 			#print(dicts[i]['sent'][0], dicts[i+1]['sent'][0])
 			for wrd in rhyme_dict1['sent']:
 				if wrd not in rhyme_dict1['ctx']: rhyme_dict1['ctx'].append(wrd)

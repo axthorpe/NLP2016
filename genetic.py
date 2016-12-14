@@ -1,3 +1,14 @@
+import editdistance
+from nltk.corpus import wordnet as wn
+from nltk.wsd import lesk
+from nltk.corpus import cmudict
+import stress as st
+import random
+import music
+import wikipedia
+import copy
+import rhymer
+
 from nltk.corpus import brown
 from nltk.probability import LidstoneProbDist, WittenBellProbDist
 from collections import defaultdict
@@ -300,8 +311,9 @@ if __name__ == "__main__":
 	#sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
 	#sample = "Termites eat through wood two times faster when listening to rock music!\n"
 	#sample = "Not all trees have all the organs or parts as mentioned above. For example, most palm trees are not branched, the cactus of North America has no functional leaves, tree ferns do not produce bark. Based on their general shape and size, all of these are nonetheless generally regarded as trees. Trees can vary very much. A plant form that is similar to a tree, but generally having smaller, multiple trunks and branches that arise near the ground, is called a shrub or a bush. Even though that is true, no precise differentiation between shrubs and trees is possible. Given their small size, bonsai plants would not technically be trees, but one should not confuse reference to the form of a species with the size or shape of individual specimens. A spruce seedling does not fit the definition of a tree, but all spruces are trees."
-	sample = "Today, some dogs are used as pets, others are used to help humans do their work."# They are a popular pet because they are usually playful, friendly, and listen to humans. Thirty million dogs in the United States are registered as pets. Dogs eat both meat and vegetables, often mixed together and sold in stores as dog food. Dogs often have jobs, including as police dogs, army dogs, assistance dogs, fire dogs, messenger dogs, hunting dogs, herding dogs, or rescue dogs. There are at least eight hundred breeds of dogs. Dogs whose parents were the same breed will also be that breed: these dogs are called purebred or pure pedigree dogs. Dogs with parents from different breeds no longer belong to one breed: they are called hybrids. Some of the most popular breeds are poodles and retrievers. It is becoming popular to breed together two different breeds of dogs and call the new dogs breed a name that is a mixture of the parents breeds two names. These dogs are normally used for prize shows and designer shows. They can be guide dogs."
-
+	#sample = "Today, some dogs are used as pets, others are used to help humans do their work. They are a popular pet because they are usually playful, friendly, and listen to humans. Thirty million dogs in the United States are registered as pets. Dogs eat both meat and vegetables, often mixed together and sold in stores as dog food. Dogs often have jobs, including as police dogs, army dogs, assistance dogs, fire dogs, messenger dogs, hunting dogs, herding dogs, or rescue dogs. There are at least eight hundred breeds of dogs. Dogs whose parents were the same breed will also be that breed: these dogs are called purebred or pure pedigree dogs. Dogs with parents from different breeds no longer belong to one breed: they are called hybrids. Some of the most popular breeds are poodles and retrievers. It is becoming popular to breed together two different breeds of dogs and call the new dogs breed a name that is a mixture of the parents breeds two names. These dogs are normally used for prize shows and designer shows. They can be guide dogs."
+	#sample = "The earliest automobiles recorded were actually steam engines attached to wagons in the late eighteenth century. The steam engines were heavy and therefore the wagon was slow and hard to control. Better and faster steam cars became common late in the nineteenth century. Some cars in the early twentieth century were powered by electricity. They were slow and heavy and went out of use until the idea came back later in the century. The internal combustion engine changed the way automobiles were powered. The engine used either gasoline, diesel, or kerosene to work. When the gas is exploded in a cylinder it pushes the piston down and turns the wheel."
+	sample = "Tomato is a red fruit. It is shiny and smooth, and has many small seeds. The tomato is green when it is unripe. It is very sour and it is good for you. It slowly changes color from green to red as it gets more ripe. There are many different types of tomatoes. Most tomatoes are red, but some special kinds are yellow or orange when they are ripe. Also, some tomatoes are as small as strawberries, and some will become as big as apples. Tomatoes are used a lot in Italian food. They are also used to make ketchup. Sometimes, people mistake tomatoes for vegetables, but they are not, because they contain seeds. Tomato seeds are dispersed by being eaten by, and then passing through, animals."
 	tup = st.getBeatFromParagraph(sample)
 	#print(tup)
 

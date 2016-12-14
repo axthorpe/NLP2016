@@ -162,14 +162,14 @@ def mutate(indiv, idx):
 	mutated_sentence = random.choice(mutations)(indiv, idx)
 	return mutated_sentence
 
-def get_likelihood_score(sent):
+def get_likelihood_score(indiv):
 	prob = 0.0
 	#ngram_rev['jefferson']['thomas'] = -1.7
 	#ngram['thomas']['jefferson']
 	#for word in indiv['ctx']:
 	for i in range(0, len(indiv['ctx']) - 1):
-		word = sent[i].lower()
-		next = sent[i+1].lower()
+		word = indiv['ctx'][i].lower()
+		next = indiv['ctx'][i+1].lower()
 		try:
 			prob += ngram[word][next]
 			#print(prob)
@@ -177,8 +177,8 @@ def get_likelihood_score(sent):
 			#print("dis not in here")
 			prob += (-5)
 	for i in range(1, len(indiv['ctx'])):
-		word = sent[i].lower()
-		prev = sent[i-1].lower()
+		word = indiv['ctx'][i].lower()
+		prev = indiv['ctx'][i-1].lower()
 		try:
 			prob += ngram_rev[prev][word]
 			#print(prob)
@@ -299,12 +299,14 @@ if __name__ == "__main__":
 	#sample = "The dog walked all around the world looking for a place to eat food. It finally found a little house on the prairie. The dog walked into the house and ate some roasted chicken!"
 	#sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
 	#sample = "Termites eat through wood two times faster when listening to rock music!\n"
-	sample = "Not all trees have all the organs or parts as mentioned above. For example, most palm trees are not branched, the cactus of North America has no functional leaves, tree ferns do not produce bark. Based on their general shape and size, all of these are nonetheless generally regarded as trees. Trees can vary very much. A plant form that is similar to a tree, but generally having smaller, multiple trunks and branches that arise near the ground, is called a shrub or a bush. Even though that is true, no precise differentiation between shrubs and trees is possible. Given their small size, bonsai plants would not technically be trees, but one should not confuse reference to the form of a species with the size or shape of individual specimens. A spruce seedling does not fit the definition of a tree, but all spruces are trees."
+	#sample = "Not all trees have all the organs or parts as mentioned above. For example, most palm trees are not branched, the cactus of North America has no functional leaves, tree ferns do not produce bark. Based on their general shape and size, all of these are nonetheless generally regarded as trees. Trees can vary very much. A plant form that is similar to a tree, but generally having smaller, multiple trunks and branches that arise near the ground, is called a shrub or a bush. Even though that is true, no precise differentiation between shrubs and trees is possible. Given their small size, bonsai plants would not technically be trees, but one should not confuse reference to the form of a species with the size or shape of individual specimens. A spruce seedling does not fit the definition of a tree, but all spruces are trees."
+	sample = "Today, some dogs are used as pets, others are used to help humans do their work."# They are a popular pet because they are usually playful, friendly, and listen to humans. Thirty million dogs in the United States are registered as pets. Dogs eat both meat and vegetables, often mixed together and sold in stores as dog food. Dogs often have jobs, including as police dogs, army dogs, assistance dogs, fire dogs, messenger dogs, hunting dogs, herding dogs, or rescue dogs. There are at least eight hundred breeds of dogs. Dogs whose parents were the same breed will also be that breed: these dogs are called purebred or pure pedigree dogs. Dogs with parents from different breeds no longer belong to one breed: they are called hybrids. Some of the most popular breeds are poodles and retrievers. It is becoming popular to breed together two different breeds of dogs and call the new dogs breed a name that is a mixture of the parents breeds two names. These dogs are normally used for prize shows and designer shows. They can be guide dogs."
+
 	tup = st.getBeatFromParagraph(sample)
 	#print(tup)
 
 	#good_old_song = "that good old song of element we sing it oar and oar\nIt cheers are hearts and warms are blood to hear them shout and roar\nwe come from old Virginia where all is bright and gay\nlets all join hands and give a yell for the dear old element"
-	good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
 	
 	#good_old_song = "Well the years start coming and they don't stop coming\nFed to the rules and I hit the ground running\nDidn't make sense not to live for fun\nYour brain gets smart but your head gets dumb\nSo much to do, so much to see\nSo what's wrong with taking the back streets\nYou never know if you do go\nYou never shine if you do glow"
 
@@ -348,7 +350,6 @@ if __name__ == "__main__":
 	#print(dicts)
 
 	# call divyas function, pass in dicts[i], and dicts[i+1]
-	"""
 	rhyme_dicts = []
 	print("About to create our rhymes!")
 	for i in range(0, len(dicts) - 1, 2):
@@ -368,13 +369,12 @@ if __name__ == "__main__":
 
 	for rhym in rhyme_dicts:
 		print(rhym['sent'])
-	"""
 	count = 0
 	evolved_sents = []
 	z = 0
 
 	sents_over_time = {}
-	for t_dict in dicts: #not rhyme dicts for now
+	for t_dict in rhyme_dicts: #not rhyme dicts for now
 		pop = population(t_dict)
 		#print(best_song)
 		if count == len(num_beats):
@@ -385,7 +385,7 @@ if __name__ == "__main__":
 		#print(k[0]['sent'])
 		#print(fitness(t_dict, best_song[0]))
 		sub_score = 0.0
-		for i in range(0, 1000):
+		for i in range(0, 300):
 			pop = evolve(pop, target)
 			if i % 5 == 0:
 				graded = [(fitness(x, target), x) for x in pop]
@@ -418,6 +418,10 @@ if __name__ == "__main__":
 		#print(fitness(graded[99], target))
 	idx_2 = 0
 	post_score = 0.0
+
+	for evo in evolved_sents:
+		print(evo[0])
+	"""
 	for evo in evolved_sents:
 		print(stresses[idx_2])
 		post_score += getLevyScore(evo[1], stresses[0])
@@ -436,3 +440,4 @@ if __name__ == "__main__":
 		#print("--------------------------------------")
 		print(sub_sum / len(sents_over_time[sent]))
 		#print("--------------------------------------")
+	"""

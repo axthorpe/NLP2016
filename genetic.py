@@ -1,12 +1,12 @@
 from nltk.corpus import brown
 from nltk.probability import LidstoneProbDist, WittenBellProbDist
-
 from collections import defaultdict
 import nltk
 from nltk.tokenize import word_tokenize
 import numpy as np
 from nltk.corpus import brown
 
+# train our likelihood model on front and back context of brown corpus
 ngram = defaultdict(lambda: defaultdict(int))
 ngram_rev = defaultdict(lambda: defaultdict(int)) #reversed n-grams
 corpus = " ".join(str(word) for word in brown.words())
@@ -24,44 +24,16 @@ for token in ngram:
 					for nxt, v in ngram[token].items()}
 	ngram_rev[token] = {prv: np.log(v) - total_rev 
 					for prv, v in ngram_rev[token].items()}
-#assume indiv = {'sent': [a,b,c,d,e], 'context': [a,b,c,d,e,f,g,h,i], 'stress': [a,b,c,d,e]}
 
 def population(indiv):
 	#generate our initial seed population
-
-	"""
-	candidates = []
-	idx2synonyms = {}
-	num_synonyms = 0
-	for idx in range(0, len(indiv['sent'])):
-		for sentenc in indiv['ctx']:
-			if word in nltk.word_tokenize(sentenc):
-				net = lesk(indiv['ctx'], word)
-				if net:
-					synonyms = net.lemma_names()
-					if len(synonyms) > 0:
-						idx2synonyms[idx] = synonyms
-						num_synonyms += 1
-				break
-
-	for i in range(0, 20):
-		num_replacements = random.randint(0, num_synonyms)
-		replaced = 0
-		while (replaced < num_replacements):
-			# keep replacing words with some random synonym, then save this to thing
-
-	pass
-	"""
 	pop = []
-	#print(indiv)
-	for i in range(0, 200):
+	for i in range(0, 80):
 		new_one = copy.deepcopy(indiv)
 		if len(indiv['sent']) > 2:
 			pop.append(mutate(new_one, random.randint(0, len(indiv['sent']) -2)))
 		else:
 			pop.append(new_one)
-		#print(pop[i]['sent'])
-
 	return pop
 
 def hypernym_substitution(indiv, idx):
@@ -134,8 +106,6 @@ def nym_substitution(indiv, idx, nyms):
 		indiv['ctx'][findCtxIdx(indiv, indiv['sent'][idx])] = nym #order matters
 		indiv['sent'][idx] = nym
 	else:
-		#print(nym)
-		#print(nym.lemma_names())
 		if '-' in nym:
 			multi_words = nym.split('-')
 		elif '_' in nym:
@@ -160,11 +130,6 @@ def nym_substitution(indiv, idx, nyms):
 			return indiv
  
 	return indiv
-
-def intensifier_addition(indiv, idx):
-	#insert an intensifier before sentence[idx] if it makes sense to (so probably before verbs or adjectives)
-
-	pass
 
 def one_syllable_flipper(indiv, idx):
 	#with low probability, if the sentence[idx] is a 1 syllable word, we can destress it or stress it
@@ -197,14 +162,14 @@ def mutate(indiv, idx):
 	mutated_sentence = random.choice(mutations)(indiv, idx)
 	return mutated_sentence
 
-def get_likelihood_score(sent):
+def get_likelihood_score(indiv):
 	prob = 0.0
 	#ngram_rev['jefferson']['thomas'] = -1.7
 	#ngram['thomas']['jefferson']
 	#for word in indiv['ctx']:
 	for i in range(0, len(indiv['ctx']) - 1):
-		word = sent[i].lower()
-		next = sent[i+1].lower()
+		word = indiv['ctx'][i].lower()
+		next = indiv['ctx'][i+1].lower()
 		try:
 			prob += ngram[word][next]
 			#print(prob)
@@ -212,16 +177,24 @@ def get_likelihood_score(sent):
 			#print("dis not in here")
 			prob += (-5)
 	for i in range(1, len(indiv['ctx'])):
-		word = sent[i].lower()
-		prev = sent[i-1].lower()
+		word = indiv['ctx'][i].lower()
+		prev = indiv['ctx'][i-1].lower()
 		try:
 			prob += ngram_rev[prev][word]
 			#print(prob)
 		except:
 			#print("dis not in here")
 			prob += (-5)
+	prob = prob / len(indiv['ctx'])
 
-	return 10*(np.exp(prob))
+	return 10000*(np.exp(prob))
+
+def getLevyScore(stress, target):
+	indiv_stress = ''.join((s) for s in stress)
+	target_stress = ''.join((t) for t in target)
+
+	lev_score = 10.0 - 1*(float(editdistance.eval(indiv_stress, target_stress)))
+	return lev_score/10
 
 def fitness(indiv, target):
 	# metrical model score
@@ -229,22 +202,14 @@ def fitness(indiv, target):
 
 	indiv_stress = ''.join((s) for s in indiv['stress'])
 	target_stress = ''.join((t) for t in target)
-	#print(indiv_stress, target_stress)
 	meter_score = (1/(float(editdistance.eval(indiv_stress, target_stress) + 1))) * 20
-	#meter_score = float(editdistance.eval(indiv_stress, target_stress))
-	#print(meter_score)
 	
 	num_beats_score = (1 / (float(abs(len(indiv_stress) - len(target_stress))) + 1)) * 30
 
 	#likelihood score
 	likelihood_score = get_likelihood_score(indiv)
-	#num_beats_score = float(abs(len(indiv_stress) - len(target_stress))) * 2
-	#print(num_beats_score)
 
 	return (num_beats_score + meter_score + likelihood_score)
-	# semantic score
-
-	# language model score
 
 def diff(male, female):
 	for i in range(0, len(male['sent'])):
@@ -252,7 +217,7 @@ def diff(male, female):
 		if male['stress'][i] != female['stress'][i]: return False
 	return True
 
-def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.20):
+def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.005):
 	graded = [(fitness(x, target), x) for x in pop]
 
 	graded = [x[1] for x in sorted(graded, reverse=True)]
@@ -265,13 +230,10 @@ def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.20):
 
 	modified_parents = []
 	for indiv in parents:
-		#print(indiv)
 		if mutate_chance > random.random():
 			pos_to_mutate = random.randint(0, len(indiv['sent']) - 2) # don't modify the last position
-			#print(pos_to_mutate)
 			to_mutate = copy.deepcopy(indiv)
 			mutated = mutate(to_mutate, pos_to_mutate)
-			#print(mutated['sent'])
 			modified_parents.append(mutated)
 		else:
 			modified_parents.append(indiv)
@@ -282,7 +244,6 @@ def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.20):
 	while len(children) < desired_length:
 		male = random.choice(modified_parents)
 		female = random.choice(modified_parents)
-		#if male != female:
 		if (diff(male, female)):
 			child_sent = []
 			child_ctx = []
@@ -293,7 +254,7 @@ def evolve(pop, target, retain=0.2, select_chance=0.05, mutate_chance=0.20):
 				while (male['sent'][0].lower() != male['ctx'][start_idx].lower()): start_idx += 1
 			except:
 				#print(male['sent'], male['ctx'])
-				print("Yo dis exception")
+				print("Exception: Male with Female match error")
 
 			for i in range(0, len(male['sent'])): # assuming that our parents are all lists, which is how we should store it
 				if random.random() < 0.5: # this might need to change if we add things like 'not' or we decide to delete words
@@ -336,14 +297,18 @@ if __name__ == "__main__":
 	#sample = "The number of cells in a plant is always increasing. Plants gain energy through the sun. Their leaves have a way of absorbing sun light and converting it into sugar"
 	#sample = "There are four main ways that a dog "
 	#sample = "The dog walked all around the world looking for a place to eat food. It finally found a little house on the prairie. The dog walked into the house and ate some roasted chicken!"
-	sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
+	#sample = "The sun is a weight of heavy air that is a million miles away from the earth. Space is a vacuum that contains no molecules! When astronauts go to space, they have to wear special suits in order to not be destroyed by the powerful void. These suits have lots of features like fans and a radio"
+	#sample = "Termites eat through wood two times faster when listening to rock music!\n"
+	#sample = "Not all trees have all the organs or parts as mentioned above. For example, most palm trees are not branched, the cactus of North America has no functional leaves, tree ferns do not produce bark. Based on their general shape and size, all of these are nonetheless generally regarded as trees. Trees can vary very much. A plant form that is similar to a tree, but generally having smaller, multiple trunks and branches that arise near the ground, is called a shrub or a bush. Even though that is true, no precise differentiation between shrubs and trees is possible. Given their small size, bonsai plants would not technically be trees, but one should not confuse reference to the form of a species with the size or shape of individual specimens. A spruce seedling does not fit the definition of a tree, but all spruces are trees."
+	sample = "Today, some dogs are used as pets, others are used to help humans do their work."# They are a popular pet because they are usually playful, friendly, and listen to humans. Thirty million dogs in the United States are registered as pets. Dogs eat both meat and vegetables, often mixed together and sold in stores as dog food. Dogs often have jobs, including as police dogs, army dogs, assistance dogs, fire dogs, messenger dogs, hunting dogs, herding dogs, or rescue dogs. There are at least eight hundred breeds of dogs. Dogs whose parents were the same breed will also be that breed: these dogs are called purebred or pure pedigree dogs. Dogs with parents from different breeds no longer belong to one breed: they are called hybrids. Some of the most popular breeds are poodles and retrievers. It is becoming popular to breed together two different breeds of dogs and call the new dogs breed a name that is a mixture of the parents breeds two names. These dogs are normally used for prize shows and designer shows. They can be guide dogs."
+
 	tup = st.getBeatFromParagraph(sample)
-	print(tup)
+	#print(tup)
 
 	#good_old_song = "that good old song of element we sing it oar and oar\nIt cheers are hearts and warms are blood to hear them shout and roar\nwe come from old Virginia where all is bright and gay\nlets all join hands and give a yell for the dear old element"
-	#good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
+	good_old_song = "and roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\nand roar and roar and roar and roar and roar\n"
 	
-	good_old_song = "Well the years start coming and they don't stop coming\nFed to the rules and I hit the ground running\nDidn't make sense not to live for fun\nYour brain gets smart but your head gets dumb\nSo much to do, so much to see\nSo what's wrong with taking the back streets\nYou'll never know if you don't go\nYou'll never shine if you don't glow"
+	#good_old_song = "Well the years start coming and they don't stop coming\nFed to the rules and I hit the ground running\nDidn't make sense not to live for fun\nYour brain gets smart but your head gets dumb\nSo much to do, so much to see\nSo what's wrong with taking the back streets\nYou never know if you do go\nYou never shine if you do glow"
 
 	stresses = []
 	num_beats = []
@@ -372,10 +337,19 @@ if __name__ == "__main__":
 	for i in range(0, len(pattern)):
 		mini_dict = st.tupToDict(pattern, i)
 		dicts.append(mini_dict)
-	print(dicts)
+
+	pre_score = 0.0
+	for i in range(0, len(dicts)):
+		#print("--------------------------")
+		#print(dicts[i]['sent'])
+		#print("--------------------------")
+		pre_score += getLevyScore(dicts[i]['stress'], stresses[0])
+
+	pre_score /= len(dicts)
+	print("The pre score is: " + str(pre_score))
+	#print(dicts)
 
 	# call divyas function, pass in dicts[i], and dicts[i+1]
-	
 	rhyme_dicts = []
 	print("About to create our rhymes!")
 	for i in range(0, len(dicts) - 1, 2):
@@ -395,10 +369,12 @@ if __name__ == "__main__":
 
 	for rhym in rhyme_dicts:
 		print(rhym['sent'])
-	
 	count = 0
 	evolved_sents = []
-	for t_dict in rhyme_dicts:
+	z = 0
+
+	sents_over_time = {}
+	for t_dict in rhyme_dicts: #not rhyme dicts for now
 		pop = population(t_dict)
 		#print(best_song)
 		if count == len(num_beats):
@@ -408,9 +384,16 @@ if __name__ == "__main__":
 		k = evolve(pop, target)
 		#print(k[0]['sent'])
 		#print(fitness(t_dict, best_song[0]))
-
-		for i in range(0, 1000):
+		sub_score = 0.0
+		for i in range(0, 300):
 			pop = evolve(pop, target)
+			if i % 5 == 0:
+				graded = [(fitness(x, target), x) for x in pop]
+				graded = [x[1] for x in sorted(graded)]
+				if i in sents_over_time:
+					sents_over_time[i].append(graded[40])
+				else:
+					sents_over_time[i] = [graded[40]]
 
 		target_str = ''.join((target[j]) for j in range(0, len(target)))
 		#print("TARGET STR: " + target_str)
@@ -420,22 +403,41 @@ if __name__ == "__main__":
 			#print("CURRENT BEAT: " + curr_str)
 
 		graded = [(fitness(x, target), x) for x in pop]
-
 		graded = [x[1] for x in sorted(graded)]
+
+		
 		#print(graded[0]['sent'])
 		#print(fitness(graded[0], target))
 		best_beat = ' '.join((graded[-1]['stress'][j]) for j in range(0, len(graded[-1]['stress'])))
 
 		best_str = ' '.join((graded[-1]['sent'][j]) for j in range(0, len(graded[-1]['sent'])))
-		evolved_sents.append((best_str, best_beat))
+		evolved_sents.append((best_str, graded[-1]['stress']))
 
 		#print("BEST STR: " + best_str)
 		count += 1
 		#print(fitness(graded[99], target))
 	idx_2 = 0
+	post_score = 0.0
+
+	for evo in evolved_sents:
+		print(evo[0])
+	"""
 	for evo in evolved_sents:
 		print(stresses[idx_2])
+		post_score += getLevyScore(evo[1], stresses[0])
 		print(evo)
 		idx_2 += 1
 		if (idx_2 == len(stresses)):
 			idx_2 = 0
+	post_score /= len(evolved_sents)
+
+	print(post_score)
+
+	for sent in range(0, 1000, 10):
+		sub_sum = 0
+		for rul in sents_over_time[sent]:
+			sub_sum += getLevyScore(rul['stress'], stresses[0])
+		#print("--------------------------------------")
+		print(sub_sum / len(sents_over_time[sent]))
+		#print("--------------------------------------")
+	"""

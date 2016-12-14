@@ -70,6 +70,9 @@ def splitBeats(tup, nums):
 	#print(curr_sentence)
 
 	#print(curr_sentence)
+	print("DIS TUP 0")
+	print(tup[0])
+	#num_beats_total = len(''.join((t) for t in tup[0]))
 	while (i < len(tup[0])):
 		idx += len(tup[0][i])
 
@@ -89,6 +92,10 @@ def splitBeats(tup, nums):
 			#print(sentence_idx)
 			curr_sentence = nltk.word_tokenize(tup[2][sentence_idx])
 		word_count += 1
+
+	if sub != []:
+		ans.append(sub)
+
 	return ans
 
 def tupToDict(tup, idx):

@@ -7,11 +7,15 @@ from subprocess import Popen, PIPE
 from spacy.en import English
 from nltk.corpus import cmudict
 import pickle
+import numpy as np
+from nltk.corpus import brown
 import spacy
 import copy
 from nltk import Tree
 from nltk.parse.stanford import StanfordParser
-parent = '/home/ubuntu/stanford/'
+from collections import defaultdict
+
+parent = '/home/divya/stanford/'
 eng_model_path = parent + "englishRNN.ser.gz"
 my_path_to_models_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar"
 my_path_to_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser.jar"
@@ -27,6 +31,50 @@ rg_data = pickle.load(file2)
 file2.close()
 print_script = ''
 result = []
+
+ngram = defaultdict(lambda: defaultdict(int))
+ngram_rev = defaultdict(lambda: defaultdict(int)) #reversed n-grams
+corpus = " ".join(str(word) for word in brown.words())
+
+for sentence in nltk.sent_tokenize(corpus):
+	tokens = map(str.lower, nltk.word_tokenize(sentence))
+	for token, next_token in zip(tokens, tokens[1:]):
+		ngram[token][next_token] += 1
+	for token, rev_token in zip(tokens[1:], tokens):
+		ngram_rev[token][rev_token] += 1
+for token in ngram:
+	total = np.log(np.sum(ngram[token].values()))
+	total_rev = np.log(np.sum(ngram_rev[token].values()))
+	ngram[token] = {nxt: np.log(v) - total 
+					for nxt, v in ngram[token].items()}
+	ngram_rev[token] = {prv: np.log(v) - total_rev 
+					for prv, v in ngram_rev[token].items()}
+
+def get_likelihood_score(sent):
+	prob = 0.0
+	#ngram_rev['jefferson']['thomas'] = -1.7
+	#ngram['thomas']['jefferson']
+	#for word in indiv['ctx']:
+	for i in range(0, len(sent) - 1):
+		word = sent[i].lower()
+		next = sent[i+1].lower()
+		try:
+			prob += ngram[word][next]
+			#print(prob)
+		except:
+			#print("dis not in here")
+			prob += (-5)
+	for i in range(1, len(sent)):
+		word = sent[i].lower()
+		prev = sent[i-1].lower()
+		try:
+			prob += ngram_rev[prev][word]
+			#print(prob)
+		except:
+			#print("dis not in here")
+			prob += (-5)
+	prob = prob/len(sent)
+	return 10*(np.exp(prob))
 
 class Node:
 	def __init__(self, val):
@@ -64,7 +112,8 @@ def synonymMaker(word, sent):
 	for hyps in hypers:
 		for ny in hyps.lemma_names():
 			synonyms.append(ny)
-
+	if word not in synonyms:
+		synonyms.append(word)
 	return list(synonyms)
 
 # def synonymMaker(word, sent):
@@ -225,12 +274,12 @@ def propogate(dtree, path):
 def dependencyParser2(sentence, prop_word):
 	global result
 	dep_tree = parser.raw_parse(sentence).next()
-	# dep_tree.pretty_print()
+	dep_tree.pretty_print()
 	paths = []
 	result = []
 	traverseTree2(dep_tree, paths, prop_word, 0)
 	propogate(dep_tree, result)
-	# dep_tree.pretty_print()
+	dep_tree.pretty_print()
 	sent = ''
 	for l in dep_tree.leaves():
 		sent = sent + l + ' '
@@ -339,6 +388,11 @@ def driver(sentence1, sentence2):
 	firstSentence =  sentence1
 	secondSentence = sentence2
 	matched_rhymes = []
+	for i in range(len(sentence1)):
+		sentence1[i] = sentence1[i].lower()
+	for i in range(len(sentence2)):
+		sentence2[i] = sentence2[i].lower()
+	
 	# synonyms1 = []
 	# synonyms2 = []
 	# for i in range(len(firstSentence)):
@@ -385,7 +439,7 @@ def driver(sentence1, sentence2):
 										if rhymes2 != None:
 											if rhymes2.strip() != '':
 												if str(rhymes1[((str(rhymes1)).index('\n')):]) == str(rhymes2[((str(rhymes2)).index('\n')):]):
-													if not [rhymes1, rhymes2] in matched_rhymes and not[rhymes2, rhymes1] in matched_rhymes and syn1 != syn2:
+													if not ([syn1, syn2] in matched_rhymes) and not ([syn2, syn1] in matched_rhymes) and syn1 != syn2:
 														sample_sent1 = firstSentence[:]	
 														sample_sent2 = secondSentence[:]
 														sample_sent1[k] = syn1
@@ -400,12 +454,16 @@ def driver(sentence1, sentence2):
 														changed_sent2 = changed_sent2[:-1]
 														propped_sent1 = dependencyParser2(changed_sent1, syn1)
 														propped_sent2 = dependencyParser2(changed_sent2, syn2)
-														matched_rhymes.append([rhymes1, rhymes2])
+														matched_rhymes.append([syn1, syn2])
+														likelihood1 = get_likelihood_score(propped_sent1)
+														likelihood2 = get_likelihood_score(propped_sent2)
 														print("------------------------------")
 														if [propped_sent1, propped_sent2] not in candidates:
-															candidates.append([propped_sent1, propped_sent2])
+															candidates.append([propped_sent1, propped_sent2, likelihood1, likelihood2])
 														print(propped_sent1)
 														print(propped_sent2)
+														print(likelihood1)
+														print(likelihood2)
 														#print(str(rhymes1[(str(rhymes1)).index('\n'):]) + "     " + str(rhymes2[(str(rhymes2)).index('\n'):]))
 														print("------------------------------")
 														#print(syn1 + "   " + syn2)
@@ -415,18 +473,33 @@ def driver(sentence1, sentence2):
 	if len(candidates) == 0:
 		return sentence1, sentence2
 	else:
-		return candidates[0][0].split(' '), candidates[0][1].split(' ')
+		best1 = ''
+		best2 = ''
+		sum_score = 0
+		for candidate_pair in candidates:
+			tot_score = get_likelihood_score(candidate_pair[0]) + get_likelihood_score(candidate_pair[1])
+			if tot_score > sum_score:
+				sum_score = tot_score
+				best1 = candidate_pair[0]
+				best2 = candidate_pair[1]
+		print('Chose: ' + best1)
+		print('Chose: ' + best2)
+		return best1.split(' '), best2.split(' ')
 if __name__ == '__main__':
 	# dependencyParser('The man shot an elephant in his sleep')
 	# print(posTag('The ram quickly jumps over the brown log'))
 	# print(synonymMaker('ram', 'The ram quickly jumps over the brown log', 'n'))
 	# print(rhymeMaker('Hello'))
-	driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'})
+	# driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'})
 	# print(driverDriver({'sent':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'ctx':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'stress':'030300300'},{'sent':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'ctx':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'stress':'030300300'}))
-	# sent1 = 'The wild giraffe enshroud in the forest to evade predators'
-	# sent2 = 'The proud lion eats deer every day'
+	
+	sent1 = 'He lives in a pineapple under the sea'
+	sent2 = 'The old man loves to eat ice cream at the restaurant down the street'
+	# He lives in a pineapple under the sea
+	# He yellow and absorbent and porous be
+	# driverDriver({'sent':sent1.split(), 'ctx':sent1.split(), 'stress':'030300300'},{'sent':sent2.split(), 'ctx':sent2.split(), 'stress':'030300300'})
 	# print(dependencyParser2(unicode(sent1), 'brown'))
-	#dependencyParser2(unicode(sent2), 'proud')
+	print(dependencyParser2(unicode(sent2.lower()), 'man'))
 	#print(driverDriver({'sent':sent1.split(), 'ctx':sent1.split(), 'stress':'030300300'},{'sent':sent2.split(), 'ctx':sent2.split(), 'stress':'030300300'}))
 	# print(driverDriver({'sent':['The', 'dog', 'played', 'outside', 'until', 'he', 'got', 'tired'], 'ctx':['The', 'dog', 'played', 'outside', 'until', 'he', 'got', 'tired'], 'stress':'030300300'},{'sent':['The', 'cat', 'sat', 'on', 'the', 'couch', 'and', 'licked', 'itself', 'clean'], 'ctx':['The', 'cat', 'sat', 'on', 'the', 'couch', 'and', 'licked', 'itself', 'clean'], 'stress':'030300300'}))
 

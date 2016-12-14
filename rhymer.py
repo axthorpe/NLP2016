@@ -15,7 +15,7 @@ from nltk import Tree
 from nltk.parse.stanford import StanfordParser
 from collections import defaultdict
 
-parent = '/home/ubuntu/stanford/'
+parent = '/home/divya/stanford/'
 eng_model_path = parent + "englishRNN.ser.gz"
 my_path_to_models_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser-3.6.0-models.jar"
 my_path_to_jar = parent + "tools/stanford-parser-full-2015-12-09/stanford-parser.jar"
@@ -274,12 +274,12 @@ def propogate(dtree, path):
 def dependencyParser2(sentence, prop_word):
 	global result
 	dep_tree = parser.raw_parse(sentence).next()
-	# dep_tree.pretty_print()
+	dep_tree.pretty_print()
 	paths = []
 	result = []
 	traverseTree2(dep_tree, paths, prop_word, 0)
 	propogate(dep_tree, result)
-	# dep_tree.pretty_print()
+	dep_tree.pretty_print()
 	sent = ''
 	for l in dep_tree.leaves():
 		sent = sent + l + ' '
@@ -492,13 +492,14 @@ if __name__ == '__main__':
 	# print(rhymeMaker('Hello'))
 	# driverDriver({'sent':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'},{'sent':['However,', 'he', 'then', 'realizes', 'that', 'the', 'log', 'was', 'a', 'river.'], 'ctx':['The', 'fox', 'quickly', 'jumps', 'over', 'the', 'brown', 'log'], 'stress':'030300300'})
 	# print(driverDriver({'sent':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'ctx':['Who', 'lives', 'in', 'a', 'pineapple', 'under', 'the', 'ocean'], 'stress':'030300300'},{'sent':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'ctx':['He', 'is', 'absorbent', 'and', 'yellow', 'and', 'porous'], 'stress':'030300300'}))
+	
 	sent1 = 'He lives in a pineapple under the sea'
-	sent2 = 'He is yellow and absorbent and porous'
+	sent2 = 'The old man loves to eat ice cream at the restaurant down the street'
 	# He lives in a pineapple under the sea
 	# He yellow and absorbent and porous be
-	driverDriver({'sent':sent1.split(), 'ctx':sent1.split(), 'stress':'030300300'},{'sent':sent2.split(), 'ctx':sent2.split(), 'stress':'030300300'})
+	# driverDriver({'sent':sent1.split(), 'ctx':sent1.split(), 'stress':'030300300'},{'sent':sent2.split(), 'ctx':sent2.split(), 'stress':'030300300'})
 	# print(dependencyParser2(unicode(sent1), 'brown'))
-	#dependencyParser2(unicode(sent2), 'proud')
+	print(dependencyParser2(unicode(sent2.lower()), 'man'))
 	#print(driverDriver({'sent':sent1.split(), 'ctx':sent1.split(), 'stress':'030300300'},{'sent':sent2.split(), 'ctx':sent2.split(), 'stress':'030300300'}))
 	# print(driverDriver({'sent':['The', 'dog', 'played', 'outside', 'until', 'he', 'got', 'tired'], 'ctx':['The', 'dog', 'played', 'outside', 'until', 'he', 'got', 'tired'], 'stress':'030300300'},{'sent':['The', 'cat', 'sat', 'on', 'the', 'couch', 'and', 'licked', 'itself', 'clean'], 'ctx':['The', 'cat', 'sat', 'on', 'the', 'couch', 'and', 'licked', 'itself', 'clean'], 'stress':'030300300'}))
 

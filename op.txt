@@ -1,0 +1,49 @@
+             ROOT                                                                 
+              |                                                                    
+              S                                                                   
+      ________|________                                                            
+     |                 VP                                                         
+     |         ________|_________________                                          
+     |        |                          S                                        
+     |        |                          |                                         
+     |        |                          VP                                       
+     |        |     _____________________|___                                      
+     |        |    |                         VP                                   
+     |        |    |    _____________________|__________                           
+     |        |    |   |       |                        PP                        
+     |        |    |   |       |          ______________|_______                   
+     |        |    |   |       |         |                      NP                
+     |        |    |   |       |         |        ______________|____              
+     |        |    |   |       |         |       |                   PP           
+     |        |    |   |       |         |       |               ____|___          
+     NP       |    |   |       NP        |       NP             |        NP       
+  ___|___     |    |   |    ___|____     |    ___|______        |     ___|____     
+ DT  JJ  NN  VBZ   TO  VB  NN       NN   IN  DT         NN      IN   DT       NN  
+ |   |   |    |    |   |   |        |    |   |          |       |    |        |    
+the old man loves  to eat ice     cream  at the     restaurant down the     street
+
+                                ROOT                                               
+                                 |                                                  
+                                 S                                                 
+            _____________________|___________________________________________       
+           VP                                                                |     
+   ________|_________________                                                |      
+  |                          S                                               |     
+  |                          |                                               |      
+  |                          VP                                              |     
+  |     _____________________|___                                            |      
+  |    |                         VP                                          |     
+  |    |    _____________________|___________                                |      
+  |    |   |       |                         PP                              |     
+  |    |   |       |          _______________|_______                        |      
+  |    |   |       |         |                       NP                      |     
+  |    |   |       |         |         ______________|____                   |      
+  |    |   |       |         |        |                   PP                 |     
+  |    |   |       |         |        |               ____|___               |      
+  |    |   |       NP        |        NP             |        NP             NP    
+  |    |   |    ___|____     |    ____|______        |     ___|____       ___|___   
+ VBZ   TO  VB  NN       NN   IN  DT          NN      IN   DT       NN    DT  JJ  NN
+  |    |   |   |        |    |   |           |       |    |        |     |   |   |  
+loves  to eat ice     cream  at the      restaurant down the     street the old man
+
+loves to eat ice cream at the restaurant down the street the old man
